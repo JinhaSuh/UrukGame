@@ -1,0 +1,29 @@
+﻿Method,URI,기능,requestBody,responseBody,비고
+POST,/account/login,로그인,,,hive_id와 pw를 보내면 player_id를 줌
+POST,/account/signup,회원가입,,,계정 생성
+POST,/player,유저 정보 조회,,,
+POST,/buyFatigue,피로도 구매,,,
+POST,/weather,날씨 정보 조회,,,"바람, 기온, 조류"
+POST,/map,맵 조회,,,
+POST,/inventory,인벤토리(=장비) 조회,,,
+POST,/inventory/upgrade,선택한 채비 업그레이드,,,
+POST,/equipSlot,장착한 채비 조회,,,
+POST,/equipSlot/equip,선택한 채비 장착,,,
+POST,/boat,사용중인 배 조회,,,
+POST,/boat/upgrade,배 업그레이드,,,
+POST,/boat/refuel,배 연료 구매,,,
+POST,/repair/fishingRod,낚싯대 내구도 수리,,,
+POST,/repair/boat, 배 내구도 수리,,,
+POST,/mailBox,선물함 조회,,,
+POST,/mailBox/receive,선물 아이템 수령,,,
+POST,/collection,도감 조회,,,
+POST,/shop,상점 조회,,,
+POST,/shop/purchase,상점 아이템 구매,,,
+POST,/shop/sell,상점에 아이템 판매,,,
+POST,/water_tank,수조 조회,,,
+POST,/auction,경매 조회,,,
+POST,/auction/sellFish,경매에 물고기 판매,,,
+POST,/departure,출항,,,지역을 선택
+POST,/arrival,입항,,,
+POST,/fishing/start,낚시,,,채비를 내릴 수심 지정
+POST,/fishing/end,낚시 취소,,,
