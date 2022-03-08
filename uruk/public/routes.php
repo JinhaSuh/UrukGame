@@ -1,82 +1,50 @@
 <?php
 
+use controller\UserController;
+use controller\AccountController;
 use DB\Config\Game_Data_Database;
 use DB\Config\Plan_Data_Database;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use Slim\Factory\AppFactory;
 use Slim\App;
+use Slim\Factory\AppFactory;
 
-//TODO : 하나의 클래스로 묶기
 require_once("Game_Data_Database.php");
 require_once("Plan_Data_Database.php");
 
+require_once __DIR__ . '/controller/UserController.php';
+require_once __DIR__ . '/controller/AccountController.php';
+
 return function (App $app) {
+    /*
+     * TODO : new Controller(...) 방식 수정
+     * TODO : 클래스 참조를 require_once를 제거하고 use만으로 가능하게 수정
+     * TODO : db설정 config로 빼기&기획or게임 스키마 선택해서 conn 가져오기
+     * TODO : CREATE UPDATE READ DELETE 모두 responseBody 추가하기(지금은 CREATE는 응답이 비었음)
+     * TODO : 상황에 맞게 responseCode return
+    */
+    //로그인
+    $app->post('/account/login', function (Request $request, Response $response) {
+        $game_db = new Game_Data_Database();
+        $conn = $game_db->getConnection();
+        $accountController = new AccountController(new \service\AccountService(new \repository\AccountRepository($conn)));
+        return $accountController->login($request, $response);
+    });
 
     //회원가입
     $app->post('/account/signUp', function (Request $request, Response $response) {
-        $data = $request->getParsedBody();
-        $player_id = $data["player_id"];
-        $nation = $data["nation"];
-        $language = $data["language"];
-
-        $sql = "INSERT INTO account (player_id, nation, language) VALUES (:player_id, :nation, :language)";
-
-        try {
-            $db = new Game_Data_Database();
-            $conn = $db->getConnection();
-
-            $stmt = $conn->prepare($sql);
-            $stmt->bindParam(':player_id', $player_id);
-            $stmt->bindParam(':nation', $nation);
-            $stmt->bindParam(':language', $language);
-
-            $result = $stmt->execute();
-
-            $response->getBody()->write(json_encode($result));
-            return $response
-                ->withHeader('content-type', 'application/json')
-                ->withStatus(200);
-        } catch (PDOException $e) {
-            $error = array(
-                "message" => $e->getMessage()
-            );
-
-            $response->getBody()->write(json_encode($error));
-            return $response
-                ->withHeader('content-type', 'application/json')
-                ->withStatus(500);
-        }
+        $game_db = new Game_Data_Database();
+        $conn = $game_db->getConnection();
+        $accountController = new AccountController(new \service\AccountService(new \repository\AccountRepository($conn)));
+        return $accountController->signUp($request, $response);
     });
 
     //유저 정보 조회
     $app->post('/user', function (Request $request, Response $response) {
-        $data = $request->getParsedBody();
-        $user_id = $data["userId"];
-
-        $sql = "SELECT * FROM user WHERE user_id =:userId";
-
-        try {
-            $db = new Game_Data_Database();
-            $conn = $db->getConnection();
-            $stmt = $conn->prepare($sql);
-            $stmt->bindParam(':userId', $user_id);
-            $stmt->execute();
-
-            $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            $payload = json_encode($data);
-            $response->getBody()->write($payload);
-            return $response->withHeader('Content-Type', 'application/json');
-        } catch (PDOException $e) {
-            $error = array(
-                "message" => $e->getMessage()
-            );
-
-            $response->getBody()->write(json_encode($error));
-            return $response
-                ->withHeader('content-type', 'application/json')
-                ->withStatus(500);
-        }
+        $game_db = new Game_Data_Database();
+        $conn = $game_db->getConnection();
+        $userController = new UserController(new \service\UserService(new \repository\UserRepository($conn)));
+        return $userController->selectUser($request, $response);
     });
 
     //기획데이터 저장
@@ -139,5 +107,5 @@ return function (App $app) {
 
         return $response;
     });
-}
-?>
+};
+
