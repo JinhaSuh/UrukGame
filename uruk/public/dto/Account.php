@@ -2,13 +2,17 @@
 
 namespace dto;
 
-class Account
+use JsonDeserializer;
+
+require_once __DIR__ . '/../JsonDeserializer.php';
+
+class Account extends JsonDeserializer implements \JsonSerializable
 {
-    private int $user_id;
-    private string $player_id;
-    private string $password;
-    private string $nation;
-    private string $language;
+    public int $user_id;
+    public string $player_id;
+    public string $password;
+    public string $nation;
+    public string $language;
 
     /**
      * @return int
@@ -90,5 +94,14 @@ class Account
         $this->language = $language;
     }
 
-
+    public function jsonSerialize()
+    {
+        return [
+            'user_id' => $this->user_id,
+            'player_id' => $this->player_id,
+            'password' => $this->password,
+            'nation' => $this->nation,
+            'language' => $this->language,
+        ];
+    }
 }

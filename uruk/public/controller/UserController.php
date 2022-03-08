@@ -40,6 +40,8 @@ class UserController
         $user->set_user_id($user_id);
 
         $result = $this->userService->select_user($user);
+        //결과를 User 객체로
+        $user = User::Deserialize($result);
 
         $response->getBody()->write(json_encode($result));
         return $response

@@ -2,15 +2,19 @@
 
 namespace dto;
 
-class User
+use JsonDeserializer;
+
+require_once __DIR__ . '/../JsonDeserializer.php';
+
+class User extends JsonDeserializer implements \JsonSerializable
 {
-    private int $user_id;
-    private string $nickname;
-    private int $level;
-    private int $exp;
-    private int $fatigue;
-    private int $gold;
-    private int $pearl;
+    public int $user_id;
+    public string $nickname;
+    public int $level;
+    public int $exp;
+    public int $fatigue;
+    public int $gold;
+    public int $pearl;
 
     /**
      * @return int
@@ -122,5 +126,18 @@ class User
     public function set_pearl(int $pearl): void
     {
         $this->pearl = $pearl;
+    }
+
+    public function jsonSerialize()
+    {
+        return [
+            'user_id' => $this->user_id,
+            'nickname' => $this->nickname,
+            'level' => $this->level,
+            'exp' => $this->exp,
+            'fatigue' => $this->fatigue,
+            'gold' => $this->gold,
+            'pearl' => $this->pearl
+        ];
     }
 }

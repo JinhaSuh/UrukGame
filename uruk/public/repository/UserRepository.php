@@ -7,8 +7,8 @@ use DB\Config\Plan_Data_Database;
 use dto\User;
 use PDO;
 
-require_once __DIR__ . '/../Game_Data_Database.php';
-require_once __DIR__ . '/../Plan_Data_Database.php';
+require_once __DIR__ . '/../config/Game_Data_Database.php';
+require_once __DIR__ . '/../config/Plan_Data_Database.php';
 require_once __DIR__ . '/../dto/User.php';
 
 class UserRepository

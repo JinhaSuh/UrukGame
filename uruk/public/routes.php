@@ -9,8 +9,8 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\App;
 use Slim\Factory\AppFactory;
 
-require_once("Game_Data_Database.php");
-require_once("Plan_Data_Database.php");
+//require_once __DIR__ . '/config/Game_Data_Database.php';
+//require_once __DIR__ . '/config/Plan_Data_Database.php';
 
 require_once __DIR__ . '/controller/UserController.php';
 require_once __DIR__ . '/controller/AccountController.php';
@@ -19,9 +19,8 @@ return function (App $app) {
     /*
      * TODO : new Controller(...) 방식 수정
      * TODO : 클래스 참조를 require_once를 제거하고 use만으로 가능하게 수정
-     * TODO : db설정 config로 빼기&기획or게임 스키마 선택해서 conn 가져오기
      * TODO : CREATE UPDATE READ DELETE 모두 responseBody 추가하기(지금은 CREATE는 응답이 비었음)
-     * TODO : 상황에 맞게 responseCode return
+     * TODO : Exception Handle 어디서 어떻게 해야하나 고민
     */
     //로그인
     $app->post('/account/login', function (Request $request, Response $response) {

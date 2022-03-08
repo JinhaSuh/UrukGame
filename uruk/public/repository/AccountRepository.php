@@ -7,9 +7,10 @@ use DB\Config\Plan_Data_Database;
 use dto\Account;
 use PDO;
 
-require_once __DIR__ . '/../Game_Data_Database.php';
-require_once __DIR__ . '/../Plan_Data_Database.php';
+require_once __DIR__ . '/../config/Game_Data_Database.php';
+require_once __DIR__ . '/../config/Plan_Data_Database.php';
 require_once __DIR__ . '/../dto/Account.php';
+require_once __DIR__ . '/../exception/ExceptionHandler.php';
 
 class AccountRepository
 {
@@ -51,14 +52,18 @@ class AccountRepository
 
         $sql = "INSERT INTO account (player_id, password, nation, language) VALUES (:playerId, :password, :nation, :language)";
 
-        $db = new Game_Data_Database();
-        $conn = $db->getConnection();
-        $stmt = $conn->prepare($sql);
+        $stmt = $this->conn->prepare($sql);
         $stmt->bindParam(':playerId', $player_id);
         $stmt->bindParam(':password', $password);
         $stmt->bindParam(':nation', $nation);
         $stmt->bindParam(':language', $language);
-        $stmt->execute();
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+
+        try {
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (\Exception $e) {
+            return new \Exception($e);
+        }
     }
 }
+

@@ -34,17 +34,16 @@ class AccountController
 
     public function login(Request $request, Response $response)
     {
-        $requestBody = $request->getParsedBody();
-        $player_id = $requestBody["playerId"];
-        $password = $requestBody["password"];
-
-        $account = new Account();
-        $account->set_player_id($player_id);
-        $account->set_password($password);
+        $data = $request->getParsedBody();
+        $account = Account::Deserialize($data);
 
         $result = $this->accountService->select_account($account);
 
-        $response->getBody()->write(json_encode($result));
+        if ($result > 0) $response->getBody()->write(json_encode($result));
+        else {
+            $response->getBody()->write(json_encode(array('errorCode' => '507', 'message' => '알 수 없는 HiveID입니다.')));
+            return $response->withHeader('content-type', 'application/json')->withStatus(507);
+        }
         return $response
             ->withHeader('content-type', 'application/json')
             ->withStatus(200);
@@ -53,20 +52,19 @@ class AccountController
     public function signUp(Request $request, Response $response)
     {
         $data = $request->getParsedBody();
-        $player_id = $data["playerId"];
-        $password = $data["password"];
-        $nation = $data["nation"];
-        $language = $data["language"];
-
-        $account = new Account();
-        $account->set_player_id($player_id);
-        $account->set_password($password);
-        $account->set_nation($nation);
-        $account->set_language($language);
+        $account = Account::Deserialize($data);
 
         $result = $this->accountService->insert_account($account);
 
-        //$response->getBody()->write(json_encode($result));
+        //결과를 User 객체로
+        $user = Account::Deserialize($result);
+
+        if (!$result)
+            $response->getBody()->write(json_encode(success));
+        else {
+            $response->getBody()->write(json_encode(array('errorCode' => '507', 'message' => '알 수 없는 HiveID입니다.')));
+            return $response->withHeader('content-type', 'application/json')->withStatus(507);
+        }
         return $response
             ->withHeader('content-type', 'application/json')
             ->withStatus(200);
