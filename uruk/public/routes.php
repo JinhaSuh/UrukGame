@@ -19,8 +19,7 @@ return function (App $app) {
     /*
      * TODO : new Controller(...) 방식 수정
      * TODO : 클래스 참조를 require_once를 제거하고 use만으로 가능하게 수정
-     * TODO : CREATE UPDATE READ DELETE 모두 responseBody 추가하기(지금은 CREATE는 응답이 비었음)
-     * TODO : Exception Handle 어디서 어떻게 해야하나 고민
+     * TODO : api 묶기
     */
     //로그인
     $app->post('/account/login', function (Request $request, Response $response) {

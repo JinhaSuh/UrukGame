@@ -2,6 +2,7 @@
 
 namespace controller;
 
+use exception\AccountException;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use service\AccountService;
@@ -34,39 +35,51 @@ class AccountController
 
     public function login(Request $request, Response $response)
     {
-        $data = $request->getParsedBody();
-        $account = Account::Deserialize($data);
+        $input = $request->getParsedBody();
+        $data = json_decode((string) json_encode($input), false);
 
-        $result = $this->accountService->select_account($account);
+        //필수 입력값을 입력받았는지 확인
+        if (!isset($data->player_id) || !isset($data->password)) {
+            $accountException = new AccountException("요청 형식이 잘못되었습니다.", 510);
+            $response->getBody()->write(json_encode($accountException));
+            return $response->withHeader('content-type', 'application/json')->withStatus(510);
+        }
 
-        if ($result > 0) $response->getBody()->write(json_encode($result));
-        else {
-            $response->getBody()->write(json_encode(array('errorCode' => '507', 'message' => '알 수 없는 HiveID입니다.')));
+        try {
+            $account = Account::Deserialize($data);
+            $result = $this->accountService->select_account($account);
+            $response->getBody()->write(json_encode($result));
+            return $response
+                ->withHeader('content-type', 'application/json')
+                ->withStatus(200);
+        } catch (\PDOException|AccountException $e) {
+            $response->getBody()->write(json_encode($e));
             return $response->withHeader('content-type', 'application/json')->withStatus(507);
         }
-        return $response
-            ->withHeader('content-type', 'application/json')
-            ->withStatus(200);
     }
 
     public function signUp(Request $request, Response $response)
     {
-        $data = $request->getParsedBody();
-        $account = Account::Deserialize($data);
+        $input = $request->getParsedBody();
+        $data = json_decode((string) json_encode($input), false);
 
-        $result = $this->accountService->insert_account($account);
-
-        //결과를 User 객체로
-        $user = Account::Deserialize($result);
-
-        if (!$result)
-            $response->getBody()->write(json_encode(success));
-        else {
-            $response->getBody()->write(json_encode(array('errorCode' => '507', 'message' => '알 수 없는 HiveID입니다.')));
-            return $response->withHeader('content-type', 'application/json')->withStatus(507);
+        //필수 입력값을 입력받았는지 확인
+        if (!isset($data->player_id) || !isset($data->password)) {
+            $accountException = new AccountException("요청 형식이 잘못되었습니다.", 510);
+            $response->getBody()->write(json_encode($accountException));
+            return $response->withHeader('content-type', 'application/json')->withStatus(510);
         }
-        return $response
-            ->withHeader('content-type', 'application/json')
-            ->withStatus(200);
+
+        try {
+            $account = Account::Deserialize($data);
+            $result = $this->accountService->insert_account($account);
+            $response->getBody()->write(json_encode($data));
+            return $response
+                ->withHeader('content-type', 'application/json')
+                ->withStatus(200);
+        } catch (\PDOException|AccountException $e) {
+            $response->getBody()->write(json_encode($e));
+            return $response->withHeader('content-type', 'application/json')->withStatus(510);
+        }
     }
 }
