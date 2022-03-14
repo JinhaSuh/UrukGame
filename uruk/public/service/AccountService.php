@@ -13,9 +13,9 @@ class AccountService
 {
     private AccountRepository $accountRepository;
 
-    public function __construct(AccountRepository $accountRepository)
+    public function __construct()
     {
-        $this->accountRepository = $accountRepository;
+        $this->accountRepository = new AccountRepository();
     }
 
     public function select_accounts()

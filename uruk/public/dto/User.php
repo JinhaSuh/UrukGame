@@ -9,7 +9,7 @@ require_once __DIR__ . '/../JsonDeserializer.php';
 class User extends JsonDeserializer implements \JsonSerializable
 {
     public int $user_id;
-    public string $nickname;
+    public string $user_name;
     public int $level;
     public int $exp;
     public int $fatigue;
@@ -35,17 +35,17 @@ class User extends JsonDeserializer implements \JsonSerializable
     /**
      * @return string
      */
-    public function get_nickname(): string
+    public function get_username(): string
     {
-        return $this->nickname;
+        return $this->user_name;
     }
 
     /**
-     * @param string $nickname
+     * @param string $user_name
      */
-    public function set_nickname(string $nickname): void
+    public function set_username(string $user_name): void
     {
-        $this->nickname = $nickname;
+        $this->user_name = $user_name;
     }
 
     /**
@@ -132,7 +132,7 @@ class User extends JsonDeserializer implements \JsonSerializable
     {
         return [
             'user_id' => $this->user_id,
-            'nickname' => $this->nickname,
+            'user_name' => $this->user_name,
             'level' => $this->level,
             'exp' => $this->exp,
             'fatigue' => $this->fatigue,

@@ -10,7 +10,7 @@ use Slim\App;
 class Plan_Data_Database
 {
     private $host = "localhost:3306";
-    private $db_name = "PLAN_DATA";
+    private $db_name = "PLAN_DATA_DB";
     private $username = "root";
     private $password = "Xowlsgk01!";
 

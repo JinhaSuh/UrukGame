@@ -8,25 +8,29 @@ use dto\Account;
 use exception\AccountException;
 use PDO;
 
+require_once __DIR__ . '/../dto/Account.php';
+require_once __DIR__ . '/../exception/AccountException.php';
 require_once __DIR__ . '/../config/Game_Data_Database.php';
 require_once __DIR__ . '/../config/Plan_Data_Database.php';
-require_once __DIR__ . '/../dto/Account.php';
 
 class AccountRepository
 {
-    private PDO $conn;
+    private PDO $game_db_conn;
+    private PDO $plan_db_conn;
 
-    public function __construct(PDO $connection)
+    public function __construct()
     {
-        $this->conn = $connection;
-        //set_exception_handler('account_exception');
+        $game_db = new Game_Data_Database();
+        $plan_db = new Plan_Data_Database();
+        $this->game_db_conn = $game_db->getConnection();
+        $this->plan_db_conn = $plan_db->getConnection();
     }
 
     public function select_account_list()
     {
         $sql = "SELECT * FROM account";
 
-        $stmt = $this->conn->prepare($sql);
+        $stmt = $this->game_db_conn->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -40,7 +44,7 @@ class AccountRepository
         $password = $account->get_password();
         $sql = "SELECT * FROM account WHERE player_id =:playerId AND password=:password";
 
-        $stmt = $this->conn->prepare($sql);
+        $stmt = $this->game_db_conn->prepare($sql);
         $stmt->bindParam(':playerId', $player_id);
         $stmt->bindParam(':password', $password);
 
@@ -63,14 +67,23 @@ class AccountRepository
 
         $sql = "INSERT INTO account (player_id, password, nation, language) VALUES (:playerId, :password, :nation, :language)";
 
-        $stmt = $this->conn->prepare($sql);
+        $stmt = $this->game_db_conn->prepare($sql);
         $stmt->bindParam(':playerId', $player_id);
         $stmt->bindParam(':password', $password);
         $stmt->bindParam(':nation', $nation);
         $stmt->bindParam(':language', $language);
 
         $stmt->execute();
-        return $account;
+        $new_user_id = $this->game_db_conn->lastInsertId();
+
+        $new_account = new Account();
+        $new_account->player_id = $account->get_player_id();
+        $new_account->password = $account->get_password();
+        if (!isset($account->nation)) $new_account->nation = $account->nation = "";
+        if (!isset($account->language)) $new_account->language = $account->language = "";
+        $new_account->user_id = $new_user_id;
+
+        return $new_account;
     }
 }
 

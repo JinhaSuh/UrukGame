@@ -13,14 +13,15 @@ use Slim\Factory\AppFactory;
 
 require_once __DIR__ . '/../dto/Account.php';
 require_once __DIR__ . '/../service/AccountService.php';
+require_once __DIR__ . '/../exception/AccountException.php';
 
 class AccountController
 {
     private AccountService $accountService;
 
-    public function __construct(AccountService $accountService)
+    public function __construct()
     {
-        $this->accountService = $accountService;
+        $this->accountService = new AccountService();
     }
 
     public function selectAccounts(Request $request, Response $response)
@@ -36,12 +37,12 @@ class AccountController
     public function login(Request $request, Response $response)
     {
         $input = $request->getParsedBody();
-        $data = json_decode((string) json_encode($input), false);
+        $data = json_decode((string)json_encode($input), false);
 
         //필수 입력값을 입력받았는지 확인
         if (!isset($data->player_id) || !isset($data->password)) {
             $accountException = new AccountException("요청 형식이 잘못되었습니다.", 510);
-            $response->getBody()->write(json_encode($accountException));
+            $response->getBody()->write($accountException->getMessage());
             return $response->withHeader('content-type', 'application/json')->withStatus(510);
         }
 
@@ -53,7 +54,7 @@ class AccountController
                 ->withHeader('content-type', 'application/json')
                 ->withStatus(200);
         } catch (\PDOException|AccountException $e) {
-            $response->getBody()->write(json_encode($e));
+            $response->getBody()->write($e->getMessage());
             return $response->withHeader('content-type', 'application/json')->withStatus(507);
         }
     }
@@ -61,25 +62,26 @@ class AccountController
     public function signUp(Request $request, Response $response)
     {
         $input = $request->getParsedBody();
-        $data = json_decode((string) json_encode($input), false);
+        $data = json_decode((string)json_encode($input), false);
 
         //필수 입력값을 입력받았는지 확인
         if (!isset($data->player_id) || !isset($data->password)) {
             $accountException = new AccountException("요청 형식이 잘못되었습니다.", 510);
-            $response->getBody()->write(json_encode($accountException));
+            $response->getBody()->write($accountException->getMessage());
             return $response->withHeader('content-type', 'application/json')->withStatus(510);
         }
 
         try {
             $account = Account::Deserialize($data);
             $result = $this->accountService->insert_account($account);
-            $response->getBody()->write(json_encode($data));
+            $new_account = Account::Deserialize($result);
+            $response->getBody()->write(json_encode($new_account));
             return $response
                 ->withHeader('content-type', 'application/json')
                 ->withStatus(200);
         } catch (\PDOException|AccountException $e) {
-            $response->getBody()->write(json_encode($e));
-            return $response->withHeader('content-type', 'application/json')->withStatus(510);
+            $response->getBody()->write($e->getMessage());
+            return $response->withHeader('content-type', 'application/json')->withStatus(507);
         }
     }
 }

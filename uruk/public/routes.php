@@ -2,47 +2,42 @@
 
 use controller\UserController;
 use controller\AccountController;
-use DB\Config\Game_Data_Database;
 use DB\Config\Plan_Data_Database;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\App;
 use Slim\Factory\AppFactory;
 
-//require_once __DIR__ . '/config/Game_Data_Database.php';
-//require_once __DIR__ . '/config/Plan_Data_Database.php';
-
 require_once __DIR__ . '/controller/UserController.php';
 require_once __DIR__ . '/controller/AccountController.php';
 
 return function (App $app) {
     /*
-     * TODO : new Controller(...) 방식 수정
      * TODO : 클래스 참조를 require_once를 제거하고 use만으로 가능하게 수정
      * TODO : api 묶기
     */
     //로그인
     $app->post('/account/login', function (Request $request, Response $response) {
-        $game_db = new Game_Data_Database();
-        $conn = $game_db->getConnection();
-        $accountController = new AccountController(new \service\AccountService(new \repository\AccountRepository($conn)));
+        $accountController = new AccountController();
         return $accountController->login($request, $response);
     });
 
     //회원가입
     $app->post('/account/signUp', function (Request $request, Response $response) {
-        $game_db = new Game_Data_Database();
-        $conn = $game_db->getConnection();
-        $accountController = new AccountController(new \service\AccountService(new \repository\AccountRepository($conn)));
+        $accountController = new AccountController();
         return $accountController->signUp($request, $response);
     });
 
     //유저 정보 조회
     $app->post('/user', function (Request $request, Response $response) {
-        $game_db = new Game_Data_Database();
-        $conn = $game_db->getConnection();
-        $userController = new UserController(new \service\UserService(new \repository\UserRepository($conn)));
+        $userController = new UserController();
         return $userController->selectUser($request, $response);
+    });
+
+    //피로도 구매
+    $app->post('/buyFatigue', function (Request $request, Response $response) {
+        $userController = new UserController();
+        return $userController->buyFatigue($request, $response);
     });
 
     //기획데이터 저장
