@@ -5,11 +5,11 @@ namespace repository;
 use DB\Config\Game_Data_Database;
 use DB\Config\Plan_Data_Database;
 use dto\Account;
-use exception\AccountException;
+use exception\UnknownHiveID;
 use PDO;
 
 require_once __DIR__ . '/../dto/Account.php';
-require_once __DIR__ . '/../exception/AccountException.php';
+require_once __DIR__ . '/../exception/UnknownHiveID.php';
 require_once __DIR__ . '/../config/Game_Data_Database.php';
 require_once __DIR__ . '/../config/Plan_Data_Database.php';
 
@@ -36,12 +36,12 @@ class AccountRepository
     }
 
     /**
-     * @throws AccountException
+     * @throws UnknownHiveID
      */
-    public function select_account(Account $account)
+    public function select_account($account)
     {
-        $player_id = $account->get_player_id();
-        $password = $account->get_password();
+        $player_id = $account["player_id"];
+        $password = $account["password"];
         $sql = "SELECT * FROM account WHERE player_id =:playerId AND password=:password";
 
         $stmt = $this->game_db_conn->prepare($sql);
@@ -50,20 +50,20 @@ class AccountRepository
 
         $stmt->execute();
         if ($stmt->rowCount() > 0)
-            return $stmt->fetchObject(Account::class);
+            return $stmt->fetch(PDO::FETCH_ASSOC);
         else
-            throw new AccountException("알 수 없는 HiveID입니다.", 507);
+            throw new UnknownHiveID();
     }
 
     /**
-     * @throws AccountException
+     * @throws UnknownHiveID
      */
-    public function insert_account(Account $account)
+    public function insert_account($account)
     {
-        $player_id = $account->get_player_id();
-        $password = $account->get_password();
-        isset($account->nation) ? $nation = $account->get_nation() : $nation = null;
-        isset($account->language) ? $language = $account->get_language() : $language = null;
+        $player_id = $account["player_id"];
+        $password = $account["password"];
+        isset($account["nation"]) ? $nation = $account["nation"] : $nation = null;
+        isset($account["language"]) ? $language = $account["language"] : $language = null;
 
         $sql = "INSERT INTO account (player_id, password, nation, language) VALUES (:playerId, :password, :nation, :language)";
 
@@ -72,18 +72,9 @@ class AccountRepository
         $stmt->bindParam(':password', $password);
         $stmt->bindParam(':nation', $nation);
         $stmt->bindParam(':language', $language);
-
         $stmt->execute();
-        $new_user_id = $this->game_db_conn->lastInsertId();
 
-        $new_account = new Account();
-        $new_account->player_id = $account->get_player_id();
-        $new_account->password = $account->get_password();
-        if (!isset($account->nation)) $new_account->nation = $account->nation = "";
-        if (!isset($account->language)) $new_account->language = $account->language = "";
-        $new_account->user_id = $new_user_id;
-
-        return $new_account;
+        return $this->select_account($account);
     }
 }
 

@@ -5,11 +5,13 @@ namespace repository;
 use DB\Config\Game_Data_Database;
 use DB\Config\Plan_Data_Database;
 use dto\User;
+use exception\InvalidError;
 use exception\UserException;
 use PDO;
 
 require_once __DIR__ . '/../dto/User.php';
 require_once __DIR__ . '/../exception/UserException.php';
+require_once __DIR__ . '/../exception/InvalidError.php';
 require_once __DIR__ . '/../config/Game_Data_Database.php';
 require_once __DIR__ . '/../config/Plan_Data_Database.php';
 
@@ -38,9 +40,9 @@ class UserRepository
     /**
      * @throws UserException
      */
-    public function select_user(User $user)
+    public function select_user($user)
     {
-        $user_id = $user->get_user_id();
+        $user_id = $user["user_id"];
         $sql = "SELECT * FROM user WHERE user_id =:userId";
 
         $stmt = $this->game_db_conn->prepare($sql);
@@ -48,19 +50,19 @@ class UserRepository
 
         $stmt->execute();
         if ($stmt->rowCount() > 0)
-            return $stmt->fetchObject(User::class);
+            return $stmt->fetch(PDO::FETCH_ASSOC);
         else
             throw new UserException("알 수 없는 유저입니다.", 507);
     }
 
     /**
-     * @throws UserException
+     * @throws InvalidError
      */
-    public function update_user(User $user)
+    public function update_user($user)
     {
-        $user_id = $user->get_user_id();
-        $fatigue = $user->get_fatigue();
-        $gold = $user->get_gold();
+        $user_id = $user["user_id"];
+        $fatigue = $user["fatigue"];
+        $gold = $user["gold"];
         $sql = "UPDATE user SET fatigue=:fatigue, gold=:gold WHERE user_id=:userId";
 
         $stmt = $this->game_db_conn->prepare($sql);
@@ -73,11 +75,11 @@ class UserRepository
         if ($stmt->rowCount() > 0)
             return $user;
         else
-            throw new UserException("알 수 없는 유저입니다.", 507);
+            throw new InvalidError();
     }
 
     /**
-     * @throws UserException
+     * @throws InvalidError
      */
     public function select_level_data(int $level)
     {
@@ -90,6 +92,6 @@ class UserRepository
         if ($stmt->rowCount() > 0)
             return $stmt->fetch();
         else
-            throw new UserException("알 수 없는 유저입니다.", 507);
+            throw new InvalidError();
     }
 }

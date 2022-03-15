@@ -2,12 +2,11 @@
 
 namespace service;
 
-use exception\AccountException;
+use exception\InvalidRequestBodyException;
+use exception\UnknownHiveID;
 use repository\AccountRepository;
-use dto\Account;
 
 require_once __DIR__ . '/../repository/AccountRepository.php';
-require_once __DIR__ . '/../dto/Account.php';
 
 class AccountService
 {
@@ -24,20 +23,29 @@ class AccountService
     }
 
     /**
-     * @throws AccountException
+     * @throws UnknownHiveID
+     * @throws InvalidRequestBodyException
      */
-    public function select_account(Account $account)
+    public function select_account($account)
     {
-        $select_account =  $this->accountRepository->select_account($account);
-        return Account::Deserialize($select_account);
+        //필수 입력값을 입력받았는지 확인
+        if (!isset($account["player_id"]) || !isset($account["password"])) {
+            throw new InvalidRequestBodyException();
+        }
+
+        return $this->accountRepository->select_account($account);
     }
 
     /**
-     * @throws AccountException
+     * @throws InvalidRequestBodyException|UnknownHiveID
      */
-    public function insert_account(Account $account): Account
+    public function insert_account($account)
     {
-        $new_account = $this->accountRepository->insert_account($account);
-        return Account::Deserialize($new_account);
+        //필수 입력값을 입력받았는지 확인
+        if (!isset($account["player_id"]) || !isset($account["password"])) {
+            throw new InvalidRequestBodyException();
+        }
+
+        return $this->accountRepository->insert_account($account);
     }
 }

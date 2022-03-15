@@ -1,5 +1,6 @@
 <?php
 
+use controller\InventoryController;
 use controller\UserController;
 use controller\AccountController;
 use DB\Config\Plan_Data_Database;
@@ -10,6 +11,7 @@ use Slim\Factory\AppFactory;
 
 require_once __DIR__ . '/controller/UserController.php';
 require_once __DIR__ . '/controller/AccountController.php';
+require_once __DIR__ . '/controller/InventoryController.php';
 
 return function (App $app) {
     /*
@@ -50,6 +52,18 @@ return function (App $app) {
     $app->post('/map', function (Request $request, Response $response) {
         $userController = new UserController();
         return $userController->selectMapData($request, $response);
+    });
+
+    //인벤토리 조회
+    $app->post('/inventory', function (Request $request, Response $response) {
+        $inventoryController = new InventoryController();
+        return $inventoryController->selectInventory($request, $response);
+    });
+
+    //채비 업그레이드
+    $app->post('/inventory/upgrade', function (Request $request, Response $response) {
+        $inventoryController = new InventoryController();
+        return $inventoryController->upgradeEquipment($request, $response);
     });
 
     //기획데이터 저장
