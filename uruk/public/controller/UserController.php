@@ -3,7 +3,9 @@
 namespace controller;
 
 use dto\User;
+use service\MapService;
 use service\UserService;
+use service\WeatherService;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\App;
@@ -12,15 +14,21 @@ use exception\UserException;
 
 require_once __DIR__ . '/../dto/User.php';
 require_once __DIR__ . '/../service/UserService.php';
+require_once __DIR__ . '/../service/WeatherService.php';
+require_once __DIR__ . '/../service/MapService.php';
 require_once __DIR__ . '/../exception/UserException.php';
 
 class UserController
 {
     private UserService $userService;
+    private WeatherService $weatherService;
+    private MapService $mapService;
 
     public function __construct()
     {
         $this->userService = new UserService();
+        $this->weatherService = new WeatherService();
+        $this->mapService = new MapService();
     }
 
     public function selectAllUser(Request $request, Response $response)
@@ -70,27 +78,37 @@ class UserController
         }
 
         try {
-            //유저 정보 가져오기
             $user = User::Deserialize($data);
-            $result = $this->userService->select_user($user);
-            $selected_user = User::Deserialize($result);
-
-            //레벨 기획 데이터 가져오기
-            $current_level_data = $this->userService->select_level_data($selected_user->get_level());
-            $maxFatigue = $current_level_data["max_fatigue"];
-
-            //골드를 소비하고, 피로도를 증가
-            $selected_user->set_fatigue($selected_user->get_fatigue() + 5);
-            $selected_user->set_gold($selected_user->get_gold() - 100);
-            if ($selected_user->fatigue >= $maxFatigue) throw new UserException("충전 시 최대 피로도를 초과합니다.", 555);
-            if ($selected_user->gold < 0) throw new UserException("골드가 부족합니다.", 607);
-
-            $updated_user = $this->userService->update_user($selected_user);
-            $response->getBody()->write(json_encode($updated_user));
+            $result = $this->userService->buy_fatigue($user);
+            $response->getBody()->write(json_encode($result));
             return $response->withHeader('content-type', 'application/json')->withStatus(200);
         } catch (\PDOException|UserException $e) {
-            $response->getBody()->write($e->getCode().$e->getMessage());
+            $response->getBody()->write($e->getCode() . $e->getMessage());
             return $response->withHeader('content-type', 'application/json')->withStatus(501);
+        }
+    }
+
+    public function selectWeatherData(Request $request, Response $response)
+    {
+        try {
+            $weather_data = $this->weatherService->select_weather_data();
+            $response->getBody()->write(json_encode($weather_data));
+            return $response->withHeader('content-type', 'application/json')->withStatus(200);
+        } catch (\PDOException|UserException $e) {
+            $response->getBody()->write($e->getMessage());
+            return $response->withHeader('content-type', 'application/json')->withStatus(502);
+        }
+    }
+
+    public function selectMapData(Request $request, Response $response)
+    {
+        try {
+            $map_list = $this->mapService->select_maps();
+            $response->getBody()->write(json_encode($map_list));
+            return $response->withHeader('content-type', 'application/json')->withStatus(200);
+        } catch (\PDOException|UserException $e) {
+            $response->getBody()->write($e->getMessage());
+            return $response->withHeader('content-type', 'application/json')->withStatus(502);
         }
     }
 }

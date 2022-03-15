@@ -40,6 +40,18 @@ return function (App $app) {
         return $userController->buyFatigue($request, $response);
     });
 
+    //날씨 기획 데이터 조회
+    $app->post('/weather', function (Request $request, Response $response) {
+        $userController = new UserController();
+        return $userController->selectWeatherData($request, $response);
+    });
+
+    //맵 기획 데이터 조회
+    $app->post('/map', function (Request $request, Response $response) {
+        $userController = new UserController();
+        return $userController->selectMapData($request, $response);
+    });
+
     //기획데이터 저장
     //PLAN_DATA(csv) upload to server DB
     //Usage example) GET : /upload/auction_data

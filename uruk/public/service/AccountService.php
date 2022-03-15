@@ -28,7 +28,8 @@ class AccountService
      */
     public function select_account(Account $account)
     {
-        return $this->accountRepository->select_account($account);
+        $select_account =  $this->accountRepository->select_account($account);
+        return Account::Deserialize($select_account);
     }
 
     /**
@@ -36,6 +37,7 @@ class AccountService
      */
     public function insert_account(Account $account): Account
     {
-        return $this->accountRepository->insert_account($account);
+        $new_account = $this->accountRepository->insert_account($account);
+        return Account::Deserialize($new_account);
     }
 }

@@ -48,8 +48,8 @@ class AccountController
 
         try {
             $account = Account::Deserialize($data);
-            $result = $this->accountService->select_account($account);
-            $response->getBody()->write(json_encode($result));
+            $select_account = $this->accountService->select_account($account);
+            $response->getBody()->write(json_encode($select_account));
             return $response
                 ->withHeader('content-type', 'application/json')
                 ->withStatus(200);
@@ -73,8 +73,7 @@ class AccountController
 
         try {
             $account = Account::Deserialize($data);
-            $result = $this->accountService->insert_account($account);
-            $new_account = Account::Deserialize($result);
+            $new_account = $this->accountService->insert_account($account);
             $response->getBody()->write(json_encode($new_account));
             return $response
                 ->withHeader('content-type', 'application/json')
