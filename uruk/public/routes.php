@@ -6,6 +6,7 @@ use controller\AccountController;
 use DB\Config\Plan_Data_Database;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Slim\Interfaces\RouteCollectorProxyInterface as Group;
 use Slim\App;
 use Slim\Factory\AppFactory;
 
@@ -16,54 +17,39 @@ require_once __DIR__ . '/controller/InventoryController.php';
 return function (App $app) {
     /*
      * TODO : 클래스 참조를 require_once를 제거하고 use만으로 가능하게 수정
-     * TODO : api 묶기
     */
-    //로그인
-    $app->post('/account/login', function (Request $request, Response $response) {
-        $accountController = new AccountController();
-        return $accountController->login($request, $response);
-    });
 
-    //회원가입
-    $app->post('/account/signUp', function (Request $request, Response $response) {
-        $accountController = new AccountController();
-        return $accountController->signUp($request, $response);
-    });
+    $app->group('/account', function (Group $group) {
+        //로그인
+        $group->post('/login', AccountController::class . ':login');
 
+        //회원가입
+        $group->post('/signUp', AccountController::class . ':signUp');
+    });
     //유저 정보 조회
-    $app->post('/user', function (Request $request, Response $response) {
-        $userController = new UserController();
-        return $userController->selectUser($request, $response);
-    });
+    $app->post('/user', UserController::class. ':selectUser');
 
     //피로도 구매
-    $app->post('/buyFatigue', function (Request $request, Response $response) {
-        $userController = new UserController();
-        return $userController->buyFatigue($request, $response);
-    });
+    $app->post('/buyFatigue', UserController::class. ':buyFatigue');
 
     //날씨 기획 데이터 조회
-    $app->post('/weather', function (Request $request, Response $response) {
-        $userController = new UserController();
-        return $userController->selectWeatherData($request, $response);
-    });
+    $app->post('/weather', UserController::class. ':selectWeatherData');
 
     //맵 기획 데이터 조회
-    $app->post('/map', function (Request $request, Response $response) {
-        $userController = new UserController();
-        return $userController->selectMapData($request, $response);
-    });
+    $app->post('/map', UserController::class. ':selectMapData');
 
-    //인벤토리 조회
-    $app->post('/inventory', function (Request $request, Response $response) {
-        $inventoryController = new InventoryController();
-        return $inventoryController->selectInventory($request, $response);
-    });
+    $app->group('/inventory', function (Group $group) {
+        //인벤토리 조회
+        $group->post('', InventoryController::class . ':selectInventory');
 
-    //채비 업그레이드
-    $app->post('/inventory/upgrade', function (Request $request, Response $response) {
-        $inventoryController = new InventoryController();
-        return $inventoryController->upgradeEquipment($request, $response);
+        //채비 업그레이드
+        $group->post('/upgrade', InventoryController::class . ':upgradeEquipment');
+
+        //채비 장착
+        $group->post('/equip', InventoryController::class . ':equipEquipment');
+
+        //장착한 채비 조회
+        $group->post('/equipSlot', InventoryController::class . ':selectEquipSlot');
     });
 
     //기획데이터 저장

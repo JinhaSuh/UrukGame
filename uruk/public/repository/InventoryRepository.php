@@ -126,4 +126,17 @@ class InventoryRepository
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+
+    public function select_equipSlot($input)
+    {
+        $user_id = $input["user_id"];
+
+        $sql = "SELECT * FROM inventory WHERE user_id=:userId AND is_equipped=1 ORDER BY inv_id";
+
+        $stmt = $this->game_db_conn->prepare($sql);
+        $stmt->bindParam(':userId', $user_id);
+
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

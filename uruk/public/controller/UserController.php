@@ -2,10 +2,6 @@
 
 namespace controller;
 
-use dto\User;
-use exception\ExcessMaxFatigue;
-use exception\GoldShortage;
-use exception\InvalidError;
 use service\MapService;
 use service\UserService;
 use service\WeatherService;
@@ -13,13 +9,10 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\App;
 use Slim\Factory\AppFactory;
-use exception\UserException;
 
-require_once __DIR__ . '/../dto/User.php';
 require_once __DIR__ . '/../service/UserService.php';
 require_once __DIR__ . '/../service/WeatherService.php';
 require_once __DIR__ . '/../service/MapService.php';
-require_once __DIR__ . '/../exception/UserException.php';
 
 class UserController
 {

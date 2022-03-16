@@ -2,7 +2,7 @@
 
 namespace exception;
 
-class InvalidUpgradeEquipmentException extends \Exception
+class InvalidUpgradeEquipment extends \Exception
 {
 
     public function __construct()

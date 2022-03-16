@@ -2,7 +2,7 @@
 
 namespace service;
 
-use exception\InvalidRequestBodyException;
+use exception\InvalidRequestBody;
 use exception\UnknownHiveID;
 use repository\AccountRepository;
 
@@ -24,26 +24,26 @@ class AccountService
 
     /**
      * @throws UnknownHiveID
-     * @throws InvalidRequestBodyException
+     * @throws InvalidRequestBody
      */
     public function select_account($account)
     {
         //필수 입력값을 입력받았는지 확인
         if (!isset($account["player_id"]) || !isset($account["password"])) {
-            throw new InvalidRequestBodyException();
+            throw new InvalidRequestBody();
         }
 
         return $this->accountRepository->select_account($account);
     }
 
     /**
-     * @throws InvalidRequestBodyException|UnknownHiveID
+     * @throws InvalidRequestBody|UnknownHiveID
      */
     public function insert_account($account)
     {
         //필수 입력값을 입력받았는지 확인
         if (!isset($account["player_id"]) || !isset($account["password"])) {
-            throw new InvalidRequestBodyException();
+            throw new InvalidRequestBody();
         }
 
         return $this->accountRepository->insert_account($account);

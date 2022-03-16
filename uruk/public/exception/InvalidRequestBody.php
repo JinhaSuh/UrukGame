@@ -2,7 +2,7 @@
 
 namespace exception;
 
-class InvalidRequestBodyException extends \Exception
+class InvalidRequestBody extends \Exception
 {
 
     public function __construct()

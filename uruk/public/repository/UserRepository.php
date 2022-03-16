@@ -52,7 +52,7 @@ class UserRepository
         if ($stmt->rowCount() > 0)
             return $stmt->fetch(PDO::FETCH_ASSOC);
         else
-            throw new UserException("알 수 없는 유저입니다.", 507);
+            throw new UserException();
     }
 
     /**

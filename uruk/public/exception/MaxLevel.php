@@ -2,7 +2,7 @@
 
 namespace exception;
 
-class MaxLevelException extends \Exception
+class MaxLevel extends \Exception
 {
 
     public function __construct()
