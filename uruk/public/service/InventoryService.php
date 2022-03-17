@@ -3,14 +3,15 @@
 namespace service;
 
 use dto\Equipment;
+use Exception;
 use exception\AlreadyEquippedType;
 use exception\GoldShortage;
 use exception\InvalidError;
 use exception\InvalidUpgradeEquipment;
-use exception\MaxLevel;
+use exception\InvalidRequestBody;
+use exception\MaxGrade;
 use exception\PearlShortage;
 use exception\SameEquippedState;
-use http\Exception;
 use exception\UserException;
 use repository\InventoryRepository;
 use repository\UserRepository;
@@ -21,11 +22,12 @@ require_once __DIR__ . '/../dto/User.php';
 require_once __DIR__ . '/../dto/Equipment.php';
 require_once __DIR__ . '/../dto/Inventory.php';
 require_once __DIR__ . '/../exception/UserException.php';
-require_once __DIR__ . '/../exception/MaxLevel.php';
+require_once __DIR__ . '/../exception/MaxGrade.php';
 require_once __DIR__ . '/../exception/PearlShortage.php';
 require_once __DIR__ . '/../exception/InvalidUpgradeEquipment.php';
 require_once __DIR__ . '/../exception/SameEquippedState.php';
 require_once __DIR__ . '/../exception/AlreadyEquippedType.php';
+require_once __DIR__ . '/../exception/InvalidRequestBody.php';
 
 
 class InventoryService
@@ -39,26 +41,25 @@ class InventoryService
         $this->userRepository = new UserRepository();
     }
 
+    /**
+     * @throws InvalidRequestBody
+     */
     public function select_inventory($user)
     {
         if (!isset($user["user_id"])) {
-            throw new InvalidRequestBodyException();
+            throw new InvalidRequestBody();
         }
 
-        return $this->inventoryRepository->select_inventory($user);
+        return $this->inventoryRepository->select_inventory($user["user_id"]);
     }
 
     /**
-     * @throws UserException
-     * @throws InvalidError
-     * @throws InvalidUpgradeEquipment
-     * @throws MaxLevel
-     * @throws \Exception
+     * @throws UserException|InvalidError|InvalidUpgradeEquipment|MaxGrade|Exception
      */
     public function upgrade_equipment($input)
     {
         if (!isset($input["user_id"]) || !isset($input["inv_id"])) {
-            throw new InvalidRequestBodyException();
+            throw new InvalidRequestBody();
         }
         $user_id = $input["user_id"];
         $inv_id = $input["inv_id"];
@@ -93,7 +94,7 @@ class InventoryService
         //다음 단계의 장비 있는지 확인
         $next_step_equipment_info = $this->inventoryRepository->select_next_step_equip_info($equipment->item_type_id, $cur_grade, $cur_step + 1);
         //없을 경우
-        if (empty($next_step_equipment_info)) throw new MaxLevel();
+        if (empty($next_step_equipment_info)) throw new MaxGrade();
 
         //다음 단계로 업그레이드에 필요한 재화 기획 데이터 가져오기
         $equip_upgrade_data = $this->inventoryRepository->select_equip_upgrade_data($equipment->item_type_id, $equipment_info["grade_id"], $equipment_info["step"] + 1);
@@ -141,13 +142,12 @@ class InventoryService
     }
 
     /**
-     * @throws SameEquippedState
-     * @throws AlreadyEquippedType
+     * @throws SameEquippedState|AlreadyEquippedType|InvalidRequestBody
      */
     public function equip_equipment($input)
     {
         if (!isset($input["user_id"]) || !isset($input["inv_id"])) {
-            throw new InvalidRequestBodyException();
+            throw new InvalidRequestBody();
         }
         $user_id = $input["user_id"];
         $inv_id = $input["inv_id"];
@@ -157,8 +157,7 @@ class InventoryService
         $equipment = Equipment::Deserialize($result);
         if ($equipment->is_equipped) throw new SameEquippedState();
 
-        //TODO : 같은 종류의 장비가 이미 장착중인지 확인
-        $equipSlot = $this->inventoryRepository->select_equipSlot($input);
+        $equipSlot = $this->inventoryRepository->select_equipSlot($user_id);
         for ($i = 0; $i < count($equipSlot); $i++) {
             $item_type_id = $equipSlot[$i]["item_type_id"];
             if ($item_type_id == $equipment->item_type_id) throw new AlreadyEquippedType();
@@ -167,15 +166,18 @@ class InventoryService
         $equipment->is_equipped = 1;
         $updated_equipment = $this->inventoryRepository->update_equipment($user_id, $inv_id, $equipment);
 
-        return $this->inventoryRepository->select_inventory($input);
+        return $this->inventoryRepository->select_inventory($input["user_id"]);
     }
 
+    /**
+     * @throws InvalidRequestBody
+     */
     public function select_equipSlot($input)
     {
         if (!isset($input["user_id"])) {
-            throw new InvalidRequestBodyException();
+            throw new InvalidRequestBody();
         }
 
-        return $this->inventoryRepository->select_equipSlot($input);
+        return $this->inventoryRepository->select_equipSlot($input["user_id"]);
     }
 }

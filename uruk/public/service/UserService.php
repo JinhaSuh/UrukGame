@@ -6,12 +6,16 @@ use exception\ExcessMaxFatigue;
 use exception\GoldShortage;
 use exception\InvalidError;
 use exception\UserException;
+use exception\InvalidRequestBody;
 use repository\UserRepository;
 
 require_once __DIR__ . '/../repository/UserRepository.php';
 require_once __DIR__ . '/../dto/User.php';
 require_once __DIR__ . '/../exception/ExcessMaxFatigue.php';
 require_once __DIR__ . '/../exception/GoldShortage.php';
+require_once __DIR__ . '/../exception/InvalidError.php';
+require_once __DIR__ . '/../exception/UserException.php';
+require_once __DIR__ . '/../exception/InvalidRequestBody.php';
 
 class UserService
 {
@@ -28,27 +32,24 @@ class UserService
     }
 
     /**
-     * @throws UserException
+     * @throws UserException|InvalidRequestBody
      */
     public function select_user($user)
     {
         if (!isset($user["user_id"])) {
-            throw new InvalidRequestBodyException();
+            throw new InvalidRequestBody();
         }
 
         return $this->userRepository->select_user($user);
     }
 
     /**
-     * @throws ExcessMaxFatigue
-     * @throws GoldShortage
-     * @throws UserException
-     * @throws InvalidError
+     * @throws ExcessMaxFatigue|GoldShortage|UserException|InvalidError|InvalidRequestBody
      */
     public function buy_fatigue($user)
     {
         if (!isset($user["user_id"])) {
-            throw new InvalidRequestBodyException();
+            throw new InvalidRequestBody();
         }
 
         //유저 정보 가져오기

@@ -5,11 +5,13 @@ namespace repository;
 use DB\Config\Game_Data_Database;
 use DB\Config\Plan_Data_Database;
 use dto\Equipment;
+use exception\InvalidUpgradeEquipment;
 use PDO;
 
 require_once __DIR__ . '/../dto/Equipment.php';
 require_once __DIR__ . '/../config/Game_Data_Database.php';
 require_once __DIR__ . '/../config/Plan_Data_Database.php';
+require_once __DIR__ . '/../exception/InvalidUpgradeEquipment.php';
 
 class InventoryRepository
 {
@@ -24,10 +26,8 @@ class InventoryRepository
         $this->plan_db_conn = $plan_db->getConnection();
     }
 
-    public function select_inventory($user)
+    public function select_inventory($user_id)
     {
-        $user_id = $user["user_id"];
-
         $sql = "SELECT * FROM inventory WHERE user_id=:userId ORDER BY inv_id";
 
         $stmt = $this->game_db_conn->prepare($sql);
@@ -48,6 +48,22 @@ class InventoryRepository
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+
+    public function insert_equipment(int $user_id, Equipment $equipment)
+    {
+        $sql = "INSERT INTO inventory (user_id, item_type_id, item_id, item_count, durability, is_equipped) VALUES (:userId, :itemTypeId, :itemId, :itemCount, :durability, 0)";
+
+        $stmt = $this->game_db_conn->prepare($sql);
+        $stmt->bindParam(':userId', $user_id);
+        $stmt->bindParam(':itemTypeId', $equipment->item_type_id);
+        $stmt->bindParam(':itemId', $equipment->item_id);
+        $stmt->bindParam(':itemCount', $equipment->item_count);
+        $stmt->bindParam(':durability', $equipment->durability);
+
+        $stmt->execute();
+        return $this->select_inventory($user_id);
+    }
+
 
     public function update_equipment(int $user_id, int $inv_id, Equipment $equipment)
     {
@@ -100,6 +116,9 @@ class InventoryRepository
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
+    /**
+     * @throws InvalidUpgradeEquipment
+     */
     public function select_next_step_equip_info(int $item_type_id, int $cur_grade, int $next_step)
     {
         switch ($item_type_id) {
@@ -121,16 +140,14 @@ class InventoryRepository
                 $stmt->bindParam(':number', $next_step);
                 break;
             default:
-                throw new \Exception("업그레이드 불가능한 장비입니다.");
+                throw new InvalidUpgradeEquipment();
         }
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function select_equipSlot($input)
+    public function select_equipSlot(int $user_id)
     {
-        $user_id = $input["user_id"];
-
         $sql = "SELECT * FROM inventory WHERE user_id=:userId AND is_equipped=1 ORDER BY inv_id";
 
         $stmt = $this->game_db_conn->prepare($sql);

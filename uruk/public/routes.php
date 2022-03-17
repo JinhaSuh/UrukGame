@@ -1,8 +1,12 @@
 <?php
 
+use controller\BoatController;
+use controller\FishingController;
 use controller\InventoryController;
 use controller\UserController;
 use controller\AccountController;
+use controller\MailBoxController;
+use controller\CollectionController;
 use DB\Config\Plan_Data_Database;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -13,6 +17,10 @@ use Slim\Factory\AppFactory;
 require_once __DIR__ . '/controller/UserController.php';
 require_once __DIR__ . '/controller/AccountController.php';
 require_once __DIR__ . '/controller/InventoryController.php';
+require_once __DIR__ . '/controller/BoatController.php';
+require_once __DIR__ . '/controller/MailBoxController.php';
+require_once __DIR__ . '/controller/CollectionController.php';
+require_once __DIR__ . '/controller/FishingController.php';
 
 return function (App $app) {
     /*
@@ -26,6 +34,7 @@ return function (App $app) {
         //회원가입
         $group->post('/signUp', AccountController::class . ':signUp');
     });
+
     //유저 정보 조회
     $app->post('/user', UserController::class. ':selectUser');
 
@@ -50,6 +59,33 @@ return function (App $app) {
 
         //장착한 채비 조회
         $group->post('/equipSlot', InventoryController::class . ':selectEquipSlot');
+    });
+
+    $app->group('/boat', function (Group $group) {
+        //사용중인 배 조회
+        $group->post('', BoatController::class . ':selectBoat');
+
+        //배 업그레이드
+        $group->post('/upgrade', BoatController::class . ':upgradeBoat');
+    });
+
+    $app->group('/mailBox', function (Group $group) {
+        //선물함 조회
+        $group->post('', MailBoxController::class . ':selectMailBox');
+
+        //선물함 아이템 수령
+        $group->post('/receive', MailBoxController::class . ':receiveMailBoxItem');
+    });
+
+    //도감 조회
+    $app->post('/collection', CollectionController::class. ':selectCollection');
+
+    $app->group('/fishing', function (Group $group) {
+        //낚시 시작
+        $group->post('/start', FishingController::class . ':startFishing');
+
+        //낚시 종료
+        $group->post('/end', FishingController::class . ':endFishing');
     });
 
     //기획데이터 저장
@@ -113,4 +149,3 @@ return function (App $app) {
         return $response;
     });
 };
-

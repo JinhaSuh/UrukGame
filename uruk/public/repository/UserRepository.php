@@ -61,14 +61,22 @@ class UserRepository
     public function update_user($user)
     {
         $user_id = $user["user_id"];
+        $user_name = $user["user_name"];
+        $level = $user["level"];
+        $exp = $user["exp"];
         $fatigue = $user["fatigue"];
         $gold = $user["gold"];
-        $sql = "UPDATE user SET fatigue=:fatigue, gold=:gold WHERE user_id=:userId";
+        $pearl = $user["pearl"];
+        $sql = "UPDATE user SET user_name=:userName, level=:level, exp=:exp, fatigue=:fatigue, gold=:gold, pearl=:pearl WHERE user_id=:userId";
 
         $stmt = $this->game_db_conn->prepare($sql);
         $stmt->bindParam(':userId', $user_id);
+        $stmt->bindParam(':userName', $user_name);
+        $stmt->bindParam(':level', $level);
+        $stmt->bindParam(':exp', $exp);
         $stmt->bindParam(':fatigue', $fatigue);
         $stmt->bindParam(':gold', $gold);
+        $stmt->bindParam(':pearl', $pearl);
 
         $stmt->execute();
 
