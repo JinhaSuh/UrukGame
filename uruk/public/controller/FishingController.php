@@ -34,4 +34,20 @@ class FishingController
             return $response->withHeader('content-type', 'application/json')->withStatus(200);
         }
     }
+
+    public function endFishing(Request $request, Response $response)
+    {
+        $input = $request->getParsedBody();
+
+        try {
+            $fishing_result = $this->fishingService->end_fishing($input);
+            $response->getBody()->write(json_encode($fishing_result));
+            return $response
+                ->withHeader('content-type', 'application/json')
+                ->withStatus(200);
+        } catch (\Exception $e) {
+            $response->getBody()->write($e->getCode().": ". $e->getMessage());
+            return $response->withHeader('content-type', 'application/json')->withStatus(200);
+        }
+    }
 }

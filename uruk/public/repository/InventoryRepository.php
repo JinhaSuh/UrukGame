@@ -6,12 +6,14 @@ use DB\Config\Game_Data_Database;
 use DB\Config\Plan_Data_Database;
 use dto\Equipment;
 use exception\InvalidUpgradeEquipment;
+use exception\UnknownItemType;
 use PDO;
 
 require_once __DIR__ . '/../dto/Equipment.php';
 require_once __DIR__ . '/../config/Game_Data_Database.php';
 require_once __DIR__ . '/../config/Plan_Data_Database.php';
 require_once __DIR__ . '/../exception/InvalidUpgradeEquipment.php';
+require_once __DIR__ . '/../exception/UnknownItemType.php';
 
 class InventoryRepository
 {
@@ -64,7 +66,6 @@ class InventoryRepository
         return $this->select_inventory($user_id);
     }
 
-
     public function update_equipment(int $user_id, int $inv_id, Equipment $equipment)
     {
         $sql = "UPDATE inventory SET item_id=:itemId, item_count=:itemCount, durability=:durability, is_equipped=:isEquipped WHERE user_id=:userId AND inv_id =:invId";
@@ -95,19 +96,32 @@ class InventoryRepository
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
+    /**
+     * @throws UnknownItemType
+     */
     public function select_equip_info(Equipment $equipment)
     {
         switch ($equipment->item_type_id) {
             case 4:
                 $sql = "SELECT * FROM fishing_rod_data WHERE fishing_rod_id=:itemId";
                 break;
+            case 5:
+                $sql = "SELECT * FROM weight_data WHERE weight_id=:itemId";
+                break;
+            case 6:
+                $sql = "SELECT * FROM bait_data WHERE bait_id=:itemId";
+                break;
             case 7:
                 $sql = "SELECT * FROM reel_data WHERE reel_id=:itemId";
+                break;
+            case 8:
+                $sql = "SELECT * FROM hook_data WHERE hook_id=:itemId";
                 break;
             case 9:
                 $sql = "SELECT * FROM fishing_line_data WHERE fishing_line_id=:itemId";
                 break;
             default:
+                throw new UnknownItemType();
         }
 
         $stmt = $this->plan_db_conn->prepare($sql);
@@ -119,7 +133,7 @@ class InventoryRepository
     /**
      * @throws InvalidUpgradeEquipment
      */
-    public function select_next_step_equip_info(int $item_type_id, int $cur_grade, int $next_step)
+    public function select_next_step_equip_data(int $item_type_id, int $cur_grade, int $next_step)
     {
         switch ($item_type_id) {
             case 4:
@@ -148,12 +162,25 @@ class InventoryRepository
 
     public function select_equipSlot(int $user_id)
     {
-        $sql = "SELECT * FROM inventory WHERE user_id=:userId AND is_equipped=1 ORDER BY inv_id";
+        $sql = "SELECT * FROM inventory WHERE user_id=:userId AND is_equipped=1 ORDER BY item_type_id";
 
         $stmt = $this->game_db_conn->prepare($sql);
         $stmt->bindParam(':userId', $user_id);
 
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
+    public function select_equipSlot_item(int $user_id, int $item_type_id)
+    {
+        $sql = "SELECT * FROM inventory WHERE user_id=:userId AND is_equipped=1 AND item_type_id=:itemTypeId";
+
+        $stmt = $this->game_db_conn->prepare($sql);
+        $stmt->bindParam(':userId', $user_id);
+        $stmt->bindParam(':itemTypeId', $item_type_id);
+
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 }

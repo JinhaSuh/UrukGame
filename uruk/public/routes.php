@@ -7,6 +7,7 @@ use controller\UserController;
 use controller\AccountController;
 use controller\MailBoxController;
 use controller\CollectionController;
+use controller\WaterTankController;
 use DB\Config\Plan_Data_Database;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -21,6 +22,7 @@ require_once __DIR__ . '/controller/BoatController.php';
 require_once __DIR__ . '/controller/MailBoxController.php';
 require_once __DIR__ . '/controller/CollectionController.php';
 require_once __DIR__ . '/controller/FishingController.php';
+require_once __DIR__ . '/controller/WaterTankController.php';
 
 return function (App $app) {
     /*
@@ -87,6 +89,9 @@ return function (App $app) {
         //낚시 종료
         $group->post('/end', FishingController::class . ':endFishing');
     });
+
+    //수조 조회
+    $app->post('/waterTank', WaterTankController::class. ':selectWaterTank');
 
     //기획데이터 저장
     //PLAN_DATA(csv) upload to server DB

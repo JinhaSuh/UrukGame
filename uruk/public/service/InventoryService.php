@@ -92,7 +92,7 @@ class InventoryService
         }
 
         //다음 단계의 장비 있는지 확인
-        $next_step_equipment_info = $this->inventoryRepository->select_next_step_equip_info($equipment->item_type_id, $cur_grade, $cur_step + 1);
+        $next_step_equipment_info = $this->inventoryRepository->select_next_step_equip_data($equipment->item_type_id, $cur_grade, $cur_step + 1);
         //없을 경우
         if (empty($next_step_equipment_info)) throw new MaxGrade();
 

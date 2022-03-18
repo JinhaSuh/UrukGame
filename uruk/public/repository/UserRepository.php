@@ -89,6 +89,39 @@ class UserRepository
     /**
      * @throws InvalidError
      */
+    public function update_user_state(int $user_id, int $state, int $depth)
+    {
+        $sql = "UPDATE user_state SET state=:state, depth=:depth WHERE user_id=:userId";
+
+        $stmt = $this->game_db_conn->prepare($sql);
+        $stmt->bindParam(':userId', $user_id);
+        $stmt->bindParam(':state', $state);
+        $stmt->bindParam(':depth', $depth);
+
+        $stmt->execute();
+    }
+
+    /**
+     * @throws UserException
+     */
+    public function select_user_state(int $user_id)
+    {
+        $sql = "SELECT * FROM user_state WHERE user_id =:userId";
+
+        $stmt = $this->game_db_conn->prepare($sql);
+        $stmt->bindParam(':userId', $user_id);
+
+        $stmt->execute();
+
+        if ($stmt->rowCount() > 0)
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        else
+            throw new UserException();
+    }
+
+    /**
+     * @throws InvalidError
+     */
     public function select_level_data(int $level)
     {
         $sql = "SELECT * FROM level_up_rule_data WHERE level =:level";
