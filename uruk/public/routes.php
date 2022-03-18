@@ -93,6 +93,12 @@ return function (App $app) {
     //수조 조회
     $app->post('/waterTank', WaterTankController::class. ':selectWaterTank');
 
+    //출항
+    $app->post('/departure', BoatController::class. ':departure');
+
+    //입항
+    $app->post('/arrival', BoatController::class. ':arrival');
+
     //기획데이터 저장
     //PLAN_DATA(csv) upload to server DB
     //Usage example) GET : /upload/auction_data

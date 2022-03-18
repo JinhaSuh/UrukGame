@@ -15,6 +15,7 @@ use exception\InvalidError;
 use exception\InvalidFishingState;
 use exception\InvalidRequestBody;
 use exception\InvalidWaterDepth;
+use exception\PrepDurabilityShortage;
 use exception\SuppressFailed;
 use exception\UnknownFish;
 use exception\UnknownItemType;
@@ -40,6 +41,7 @@ require_once __DIR__ . '/../exception/BoatDurabilityShortage.php';
 require_once __DIR__ . '/../exception/InvalidFishingState.php';
 require_once __DIR__ . '/../exception/FuelShortage.php';
 require_once __DIR__ . '/../exception/InvalidWaterDepth.php';
+require_once __DIR__ . '/../exception/PrepDurabilityShortage.php';
 require_once __DIR__ . '/../exception/HookingFailed.php';
 require_once __DIR__ . '/../exception/SuppressFailed.php';
 require_once __DIR__ . '/../dto/Fish.php';
@@ -66,7 +68,7 @@ class FishingService
     }
 
     /**
-     * @throws InvalidRequestBody|UserException|FatigueShortage|EquipmentNotReady|BoatDurabilityShortage|InvalidFishingState|FuelShortage|InvalidWaterDepth|InvalidError
+     * @throws InvalidRequestBody|UserException|FatigueShortage|EquipmentNotReady|BoatDurabilityShortage|InvalidFishingState|FuelShortage|InvalidWaterDepth|InvalidError|PrepDurabilityShortage
      */
     public function start_fishing($input)
     {
@@ -81,6 +83,9 @@ class FishingService
         //채비 검사
         $equipSlot = $this->inventoryRepository->select_equipSlot($input["user_id"]);
         if (count($equipSlot) != 6) throw new EquipmentNotReady();
+        if ($equipSlot[0]["durability"] <= 0 || $equipSlot[3]["durability"] <= 0) { //낚싯대
+            throw new PrepDurabilityShortage();
+        }
 
         //배 내구도, 연료 검사
         $boat = $this->boatRepository->select_boat($input["user_id"]);
@@ -195,13 +200,19 @@ class FishingService
         //낚싯대 내구도 소비
         $updated_fishing_rod = Equipment::Deserialize($equipped_fishing_rod);
         $updated_fishing_rod->durability -= 5;
-        if ($updated_fishing_rod->durability <= 0) $updated_fishing_rod->is_equipped = 0;
+        if ($updated_fishing_rod->durability <= 0) {
+            $updated_fishing_rod->durability = 0;
+            $updated_fishing_rod->is_equipped = 0;
+        }
         $updated_fishing_rod_result = $this->inventoryRepository->update_equipment($input["user_id"], $equipped_fishing_rod["inv_id"], $updated_fishing_rod);        //낚싯대 내구도 소비
 
         //릴 내구도 소비
         $updated_fishing_reel = Equipment::Deserialize($equipped_fishing_reel);
         $updated_fishing_reel->durability -= 1;
-        if ($updated_fishing_reel->durability <= 0) $updated_fishing_reel->is_equipped = 0;
+        if ($updated_fishing_reel->durability <= 0) {
+            $updated_fishing_reel->durability = 0;
+            $updated_fishing_reel->is_equipped = 0;
+        }
         $updated_fishing_rod_result = $this->inventoryRepository->update_equipment($input["user_id"], $equipped_fishing_reel["inv_id"], $updated_fishing_reel);
 
         //낚시해서 얻은 템 return

@@ -62,6 +62,24 @@ class BoatRepository
             throw new MaxGrade();
     }
 
+
+    /**
+     * @throws MaxGrade
+     */
+    public function select_boat_data(int $boat_id)
+    {
+        $sql = "SELECT * FROM boat_data WHERE boat_id =:boatId";
+
+        $stmt = $this->plan_db_conn->prepare($sql);
+        $stmt->bindParam(':boatId', $boat_id);
+
+        $stmt->execute();
+        if ($stmt->rowCount() > 0)
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        else
+            throw new MaxGrade();
+    }
+
     /**
      * @throws UserException
      */
