@@ -76,6 +76,10 @@ class FishingService
             throw new InvalidRequestBody();
         }
 
+        //플레이어 상태 확인 및 낚시 던진 깊이 검사
+        $user_state = $this->userRepository->select_user_state($input["user_id"]);
+        if ($user_state["state"] != 2) throw new InvalidFishingState();
+
         //피로도, 현재 위치 검사
         $user = $this->userRepository->select_user($input);
         if ($user["fatigue"] <= 0) throw new FatigueShortage();
@@ -125,36 +129,39 @@ class FishingService
         $equipped_fishing_line = $equipSlot[5];
 
         //낚싯줄, 낚싯대 - 훅킹 확률
-        $hooking_percent_average = ($equipped_fishing_line["buff_hooking_rate"] + $equipped_fishing_rod["buff_hooking_rate"]) / 2;
-        if (rand(1, 100) > $hooking_percent_average) throw new HookingFailed();
+        $fishing_line = Equipment::Deserialize($equipped_fishing_line);
+        $fishing_line_data = $this->inventoryRepository->select_equip_info($fishing_line);
+        $fishing_rod = Equipment::Deserialize($equipped_fishing_rod);
+        $fishing_rod_data = $this->inventoryRepository->select_equip_info($fishing_rod);
+        $hooking_percent_average = ($fishing_line_data["buff_hooking_rate"] + $fishing_rod_data["buff_hooking_rate"]) / 2;
+        if (rand(1, 2) > $hooking_percent_average) throw new HookingFailed();
 
         //훅, 낚시줄, 낚싯대 - 제압 확률
-        $suppress_percent_average = ($equipped_hook["buff_suppress_rate"] + $equipped_fishing_line["buff_suppress_rate"] + $equipped_fishing_rod["buff_suppress_rate"]) / 3;
-        if (rand(1, 100) > $suppress_percent_average) throw new SuppressFailed();
+        $hook = Equipment::Deserialize($equipped_hook);
+        $hook_data = $this->inventoryRepository->select_equip_info($hook);
+        $suppress_percent_average = ($hook_data["buff_suppress_rate"] + $fishing_line_data["buff_suppress_rate"] + $fishing_rod_data["buff_suppress_rate"]) / 3;
+        if (rand(1, 2) > $suppress_percent_average) throw new SuppressFailed();
 
-        //현재 맵 채비 내린 수심에 등장하는 물고기 리스트
+        //현재 맵 채비 내린 수심에 등장하는 물고기와 부품 조각 리스트
         $boat = $this->boatRepository->select_boat($input["user_id"]);
         $map_drop_fish_list = $this->fishingRepository->select_map_fish_drop_data($boat["map_id"], $user_state["depth"]);
         $map_drop_item_list = $this->fishingRepository->select_map_item_drop_data($boat["map_id"]);
 
         //훅 - 물고기 등장 확률
-        $hook = Equipment::Deserialize($equipped_hook);
-        $hook_data = $this->inventoryRepository->select_equip_info($hook);
-
-        if (rand(1, 100) > $hook_data["buff_fish_drop_rate"]) { //부품 조각
+        if (rand(1, 10000) > $hook_data["buff_fish_drop_rate"]) { //부품 조각
             $equipment = $map_drop_item_list[rand(0, count($map_drop_item_list) - 1)];
 
             //인벤토리에 추가
             $caught_equipment = Equipment::Deserialize($equipment);
 
-            if ($caught_equipment->item_type_id == 4 || $caught_equipment->item_type_id == 7) {
-                //해당 채비의 최대 내구도 구해서 세팅해주기
-                $equipment_info = $this->inventoryRepository->select_equip_info($equipment);
+            //해당 채비의 최대 내구도 구해서 세팅해주기
+            $equipment_info = $this->inventoryRepository->select_equip_info($caught_equipment);
+            if ($caught_equipment->item_type_id == 4 || $caught_equipment->item_type_id == 7) { //낚싯대, 릴
                 $caught_equipment->durability = $equipment_info["max_durability"];
             } else $caught_equipment->durability = 0;
-
+            $caught_equipment->is_equipped = 0;
             $updated_inventory = $this->inventoryRepository->insert_equipment($input["user_id"], $caught_equipment);
-            $fishing_result = $caught_equipment;
+            $fishing_result = $equipment_info;
         } else { //낚시
             //TODO(Later) : 날씨 영향, 희귀 물고기 등장 확률
             $fish_list = array();
@@ -174,6 +181,8 @@ class FishingService
 
             //수조에 넣기
             $updated_water_tank = $this->waterTankRepository->insert_water_tank($input["user_id"], $fish_info);
+
+            //TODO : 도감에 물고기 추가
 
             $fishing_result = [
                 'fish_id' => $fish_info->fish_id,

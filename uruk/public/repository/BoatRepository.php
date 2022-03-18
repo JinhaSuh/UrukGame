@@ -46,6 +46,27 @@ class BoatRepository
     }
 
     /**
+     * @throws UserException
+     */
+    public function insert_boat(int $user_id, Boat $boat)
+    {
+        $sql = "INSERT INTO boat (user_id, boat_id, durability, fuel, departure_time, map_id) VALUES (:userId, :boatId, :durability, :fuel, :departureTime, :mapId)";
+
+        $stmt = $this->game_db_conn->prepare($sql);
+        $stmt->bindParam(':userId', $user_id);
+        $stmt->bindParam(':boatId', $boat->boat_id);
+        $stmt->bindParam(':durability', $boat->durability);
+        $stmt->bindParam(':fuel', $boat->fuel);
+        $date = date("Y-m-d H:i:s", $boat->departure_time->getTimestamp());
+        $stmt->bindParam(':departureTime', $date);
+        $stmt->bindParam(':mapId', $boat->map_id);
+
+        $stmt->execute();
+
+        return $this->select_boat($user_id);
+    }
+
+    /**
      * @throws MaxGrade
      */
     public function select_boat_upgrade_data(int $boat_id)

@@ -135,7 +135,7 @@ class BoatService
         $boat->set_fuel($result["fuel"]);
         $boat->set_departure_time(new DateTime($result["departure_time"]));
         $boat->set_map_id($result["map_id"]);
-        if($boat->get_map_id()!=0) throw new InvalidError();
+        if ($boat->get_map_id() != 0) throw new InvalidError();
         $boat_info = $this->boatRepository->select_boat_data($boat->get_boat_id());
         if ($boat->durability <= 0) throw new BoatDurabilityShortage();
         if ($boat->fuel <= 0) throw new FuelShortage();
@@ -148,9 +148,9 @@ class BoatService
         //입장 레벨
         $map_list = $this->mapRepository->select_map_list();
         $user = $this->userRepository->select_user($input);
-        if ($map_list[$input["map_id"]]["level_limit"] > $user["level"]) throw new LevelShortage();
+        if ($map_list[$input["map_id"] - 1]["level_limit"] > $user["level"]) throw new LevelShortage();
         //출항 비용
-        if ($user["gold"] < $map_list[$input["map_id"]]["departure_cost"]) throw new GoldShortage();
+        if ($user["gold"] < $map_list[$input["map_id"] - 1]["departure_cost"]) throw new GoldShortage();
         //피로도
         if ($user["fatigue"] - 4 <= 0) throw new FatigueShortage();
 
@@ -164,7 +164,7 @@ class BoatService
         //시간이 흐르면서 내구도나 연료가 0이하면 강제 입항
         for ($i = 0; $i < $map_list[$input["map_id"] - 1]["departure_time"]; $i++) {
             $boat->durability -= $map_list[$input["map_id"] - 1]["reduce_durability_per_meter"] * $boat_info["reduce_durability_per_min"];
-            $boat->fuel -= map_list[$input["map_id"]]["reduce_durability_per_meter"];
+            $boat->fuel -= 1;
             //출항 중에 내구도 0 이하로 강제 입항
             if ($boat->durability <= 0) {
                 $boat->durability = 0;

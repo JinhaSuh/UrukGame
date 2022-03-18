@@ -4,12 +4,10 @@ namespace repository;
 
 use DB\Config\Game_Data_Database;
 use DB\Config\Plan_Data_Database;
-use dto\User;
 use exception\InvalidError;
 use exception\UserException;
 use PDO;
 
-require_once __DIR__ . '/../dto/User.php';
 require_once __DIR__ . '/../exception/UserException.php';
 require_once __DIR__ . '/../exception/InvalidError.php';
 require_once __DIR__ . '/../config/Game_Data_Database.php';
@@ -53,6 +51,28 @@ class UserRepository
             return $stmt->fetch(PDO::FETCH_ASSOC);
         else
             throw new UserException();
+    }
+
+    /**
+     * @throws UserException
+     */
+    public function insert_user($user)
+    {
+        $sql = "INSERT INTO user (user_id, user_name, level, exp, fatigue, gold, pearl) VALUES (:userId, :userName, :level, :exp, :fatigue, :gold, :pearl)";
+
+        $stmt = $this->game_db_conn->prepare($sql);
+        $stmt->bindParam(':userId', $user->user_id);
+        $stmt->bindParam(':userName', $user->user_name);
+        $stmt->bindParam(':level', $user->level);
+        $stmt->bindParam(':exp', $user->exp);
+        $stmt->bindParam(':fatigue', $user->fatigue);
+        $stmt->bindParam(':gold', $user->gold);
+        $stmt->bindParam(':pearl', $user->pearl);
+
+        $stmt->execute();
+
+        $new_user = ['user_id' => $user->user_id];
+        return $this->select_user($new_user);
     }
 
     /**
@@ -117,6 +137,18 @@ class UserRepository
             return $stmt->fetch(PDO::FETCH_ASSOC);
         else
             throw new UserException();
+    }
+
+    public function insert_user_state(int $user_id, int $state, int $depth)
+    {
+        $sql = "INSERT INTO user_state (user_id, state, depth) VALUES (:userId, :state, :depth)";
+
+        $stmt = $this->game_db_conn->prepare($sql);
+        $stmt->bindParam(':userId', $user_id);
+        $stmt->bindParam(':state', $state);
+        $stmt->bindParam(':depth', $depth);
+
+        $stmt->execute();
     }
 
     /**

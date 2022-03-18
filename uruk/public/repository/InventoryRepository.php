@@ -53,7 +53,7 @@ class InventoryRepository
 
     public function insert_equipment(int $user_id, Equipment $equipment)
     {
-        $sql = "INSERT INTO inventory (user_id, item_type_id, item_id, item_count, durability, is_equipped) VALUES (:userId, :itemTypeId, :itemId, :itemCount, :durability, 0)";
+        $sql = "INSERT INTO inventory (user_id, item_type_id, item_id, item_count, durability, is_equipped) VALUES (:userId, :itemTypeId, :itemId, :itemCount, :durability, :isEquipped)";
 
         $stmt = $this->game_db_conn->prepare($sql);
         $stmt->bindParam(':userId', $user_id);
@@ -61,6 +61,7 @@ class InventoryRepository
         $stmt->bindParam(':itemId', $equipment->item_id);
         $stmt->bindParam(':itemCount', $equipment->item_count);
         $stmt->bindParam(':durability', $equipment->durability);
+        $stmt->bindParam(':isEquipped', $equipment->is_equipped);
 
         $stmt->execute();
         return $this->select_inventory($user_id);

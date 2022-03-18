@@ -87,7 +87,7 @@ class MailBoxService
                     $equipment_info = $this->inventoryRepository->select_equip_info($equipment);
                     $equipment->durability = $equipment_info["max_durability"];
                 } else $equipment->durability = 0;
-
+                $equipment->is_equipped = 0;
                 $updated_inventory = $this->inventoryRepository->insert_equipment($data["user_id"], $equipment);
                 break;
             case 10: //boat
