@@ -16,7 +16,7 @@ class RankingController
         $this->rankingService = new RankingService();
     }
 
-    public function selectRanking(Request $request, Response $response)
+    public function ranking(Request $request, Response $response)
     {
         $input = $request->getParsedBody();
 

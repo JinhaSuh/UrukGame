@@ -11,6 +11,7 @@ use App\repository\FishingRepository;
 use App\repository\RankingRepository;
 use App\repository\WaterTankRepository;
 use App\repository\UserRepository;
+use App\repository\RedisRepository;
 
 class AuctionService
 {
@@ -19,6 +20,7 @@ class AuctionService
     private UserRepository $userRepository;
     private FishingRepository $fishingRepository;
     private RankingRepository $rankingRepository;
+    private RedisRepository $redisRepository;
 
     public function __construct()
     {
@@ -27,6 +29,7 @@ class AuctionService
         $this->userRepository = new UserRepository();
         $this->fishingRepository = new FishingRepository();
         $this->rankingRepository = new RankingRepository();
+        $this->redisRepository = new RedisRepository();
     }
 
     /**
@@ -91,9 +94,12 @@ class AuctionService
         $updated_tank_fish_list = $this->waterTankRepository->delete_water_tank_fish($input["user_id"], $auction_fish["tank_id"]);
 
         //누적 판매 금액에 추가
+/*
         $user_ranking = $this->rankingRepository->select_user_ranking($input["user_id"]);
         if (empty($user_ranking)) $this->rankingRepository->insert_ranking($input["user_id"], date("Y-m-d H:i:s"), $auction_fish["price"]);
         else $this->rankingRepository->update_ranking($input["user_id"], date("Y-m-d H:i:s"), $user_ranking["gold_sum"] + $auction_fish["price"]);
+*/
+        $updated_gold = $this->redisRepository->add_user_gold($input["user_id"], $auction_fish["price"]);
 
         return $this->auctionRepository->select_auction($input["user_id"]);
     }

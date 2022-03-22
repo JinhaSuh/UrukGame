@@ -16,7 +16,7 @@ class BoatController
         $this->boatService = new BoatService();
     }
 
-    public function selectBoat(Request $request, Response $response)
+    public function getBoat(Request $request, Response $response)
     {
         $input = $request->getParsedBody();
 

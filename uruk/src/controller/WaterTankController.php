@@ -16,7 +16,7 @@ class WaterTankController
         $this->waterTankService = new WaterTankService();
     }
 
-    public function selectWaterTank(Request $request, Response $response)
+    public function getWaterTank(Request $request, Response $response)
     {
         $input = $request->getParsedBody();
 

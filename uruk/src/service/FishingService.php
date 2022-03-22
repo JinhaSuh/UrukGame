@@ -117,19 +117,19 @@ class FishingService
         $fishing_rod = Equipment::Deserialize($equipSlot[0]);
         $fishing_rod_data = $this->inventoryRepository->select_equip_data($fishing_rod);
         $hooking_percent_average = ($fishing_line_data["buff_hooking_rate"] + $fishing_rod_data["buff_hooking_rate"]) / 2;
-        if (rand(1, 100) > $hooking_percent_average) {
+/*        if (rand(1, 100) > $hooking_percent_average) {
             $this->endFishing($input, $equipSlot);
             throw new HookingFailed();
-        }
+        }*/
 
         //훅, 낚시줄, 낚싯대 - 제압 확률
         $hook = Equipment::Deserialize($equipSlot[4]);
         $hook_data = $this->inventoryRepository->select_equip_data($hook);
         $suppress_percent_average = ($hook_data["buff_suppress_rate"] + $fishing_line_data["buff_suppress_rate"] + $fishing_rod_data["buff_suppress_rate"]) / 3;
-        if (rand(1, 100) > $suppress_percent_average) {
+/*        if (rand(1, 100) > $suppress_percent_average) {
             $this->endFishing($input, $equipSlot);
             throw new SuppressFailed();
-        }
+        }*/
 
         //현재 맵 채비 내린 수심에 등장하는 물고기와 부품 조각 리스트
         $boat = $this->boatRepository->select_boat($input["user_id"]);
@@ -179,7 +179,23 @@ class FishingService
 
             //도감에 물고기 추가
             $fish_result = $this->collectionRepository->select_collection_fish($input["user_id"], $fish_info->fish_id);
-            if (empty($fish_result)) $this->collectionRepository->insert_collection_fish($input["user_id"], $fish_info->fish_id);
+            /*if (empty($fish_result)) {
+                $this->collectionRepository->insert_collection_fish($input["user_id"], $fish_info->fish_id);
+                $user_collection = $this->collectionRepository->select_collection($input["user_id"]);
+
+                //도감 보상 추가
+                $collection_reward_data = $this->collectionRepository->select_collection_reward_data();
+                for ($i = 0; $i < count($collection_reward_data); $i++) {
+                    if (count($user_collection) == $collection_reward_data[$i]["filled_count"]) {
+                        if ($collection_reward_data[$i]["reward_item_type_id"] == 1)
+                            $user["gold"] += $collection_reward_data[$i]["reward_item_count"];
+                        else
+                            $user["pearl"] += $collection_reward_data[$i]["reward_item_count"];
+                        break;
+                    }
+
+                }
+            }*/
 
             $user["exp"] += $fish->exp;
 
@@ -191,7 +207,7 @@ class FishingService
             ];
         }
 
-        //경험치 증가
+        //유저 정보 업데이트
         $update_user = $this->userRepository->update_user($user);
 
         $this->endFishing($input, $equipSlot);

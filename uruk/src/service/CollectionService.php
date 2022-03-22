@@ -5,7 +5,6 @@ namespace App\service;
 use App\exception\InvalidRequestBody;
 use App\repository\CollectionRepository;
 
-
 class CollectionService
 {
     private CollectionRepository $collectionRepository;

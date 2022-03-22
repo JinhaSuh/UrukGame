@@ -3,20 +3,22 @@
 namespace App\service;
 
 use App\exception\InvalidRequestBody;
-use App\exception\UnknownUser;
 use App\repository\RankingRepository;
+use App\repository\RedisRepository;
 
 class RankingService
 {
     private RankingRepository $rankingRepository;
+    private RedisRepository $redisRepository;
 
     public function __construct()
     {
         $this->rankingRepository = new RankingRepository();
+        $this->redisRepository = new RedisRepository();
     }
 
     /**
-     * @throws UnknownUser|InvalidRequestBody
+     * @throws InvalidRequestBody
      */
     public function select_ranking($input)
     {
@@ -26,7 +28,14 @@ class RankingService
         }
 
         //TODO : 주마다 리셋
-
+        $user_rank = $this->redisRepository->select_user_ranking($input["user_id"]);
+        $user_gold = $this->redisRepository->select_user_gold($input["user_id"]);
+        return [
+            "user_id" => $input["user_id"],
+            "gold_sum" => $user_gold,
+            "ranking" => $user_rank + 1
+        ];
+/*
         $ranking = $this->rankingRepository->select_ranking();
         for ($i = 0; $i < count(ranking); $i++) {
             if ($ranking[$i]["user_id"] == $input["user_id"]) {
@@ -40,6 +49,7 @@ class RankingService
         }
 
         throw new UnknownUser();
+*/
     }
 
 }

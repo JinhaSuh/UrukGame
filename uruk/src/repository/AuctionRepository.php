@@ -4,7 +4,6 @@ namespace App\repository;
 
 use App\db\Game_Data_Database;
 use App\db\Plan_Data_Database;
-use App\exception\Success;
 use App\exception\UnknownFish;
 use PDO;
 
@@ -33,9 +32,6 @@ class AuctionRepository
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    /**
-     * @throws UnknownFish
-     */
     public function select_auction_fish(int $user_id, int $tank_id)
     {
         $sql = "SELECT * FROM auction WHERE user_id =:userId AND tank_id=:tankId";

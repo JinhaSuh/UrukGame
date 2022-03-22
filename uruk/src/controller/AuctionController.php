@@ -16,7 +16,7 @@ class AuctionController
         $this->auctionService = new AuctionService();
     }
 
-    public function selectAuction(Request $request, Response $response)
+    public function getFishSellList(Request $request, Response $response)
     {
         $input = $request->getParsedBody();
 

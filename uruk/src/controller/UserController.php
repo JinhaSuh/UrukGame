@@ -22,7 +22,7 @@ class UserController
         $this->mapService = new MapService();
     }
 
-    public function selectUser(Request $request, Response $response)
+    public function getUser(Request $request, Response $response)
     {
         $input = $request->getParsedBody();
 
@@ -36,7 +36,7 @@ class UserController
         }
     }
 
-    public function buyFatigue(Request $request, Response $response)
+    public function fatigue(Request $request, Response $response)
     {
         $input = $request->getParsedBody();
 
@@ -50,7 +50,7 @@ class UserController
         }
     }
 
-    public function selectWeatherData(Request $request, Response $response)
+    public function getWeather(Request $request, Response $response)
     {
         try {
             $weather_data = $this->weatherService->select_weather_data();
@@ -62,7 +62,7 @@ class UserController
         }
     }
 
-    public function selectMapData(Request $request, Response $response)
+    public function getMap(Request $request, Response $response)
     {
         try {
             $map_list = $this->mapService->select_maps();

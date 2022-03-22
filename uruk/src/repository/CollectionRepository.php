@@ -53,4 +53,14 @@ class CollectionRepository
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+
+    public function select_collection_reward_data()
+    {
+        $sql = "SELECT * FROM collection_reward_data";
+
+        $stmt = $this->plan_db_conn->prepare($sql);
+
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

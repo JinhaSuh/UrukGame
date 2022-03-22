@@ -42,7 +42,7 @@ class BoatService
     }
 
     /**
-     * @throws UserException|InvalidRequestBody
+     * @throws UserException|InvalidRequestBody|UnknownUser
      */
     public function select_boat($user)
     {
@@ -54,7 +54,7 @@ class BoatService
     }
 
     /**
-     * @throws InvalidRequestBody|UserException|UpgradeFailure|InvalidError|GoldShortage|PearlShortage|MaxGrade|InvalidUserState
+     * @throws InvalidRequestBody|UserException|UpgradeFailure|InvalidError|GoldShortage|PearlShortage|MaxGrade|InvalidUserState|UnknownUser
      */
     public function upgrade_boat($user)
     {

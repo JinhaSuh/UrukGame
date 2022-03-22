@@ -16,7 +16,7 @@ class InventoryController
         $this->inventoryService = new InventoryService();
     }
 
-    public function selectInventory(Request $request, Response $response)
+    public function getInventory(Request $request, Response $response)
     {
         $input = $request->getParsedBody();
 
@@ -86,7 +86,7 @@ class InventoryController
         }
     }
 
-    public function selectEquipSlot(Request $request, Response $response)
+    public function getEquipSlot(Request $request, Response $response)
     {
         $input = $request->getParsedBody();
 

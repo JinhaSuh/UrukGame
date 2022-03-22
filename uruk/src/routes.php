@@ -27,20 +27,20 @@ return function (App $app) {
     });
 
     //유저 정보 조회
-    $app->post('/user', UserController::class. ':selectUser');
+    $app->post('/user', UserController::class . ':getUser');
 
     //피로도 구매
-    $app->post('/buyFatigue', UserController::class. ':buyFatigue');
+    $app->post('/buyFatigue', UserController::class . ':fatigue');
 
     //날씨 기획 데이터 조회
-    $app->post('/weather', UserController::class. ':selectWeatherData');
+    $app->post('/weather', UserController::class . ':getWeather');
 
     //맵 기획 데이터 조회
-    $app->post('/map', UserController::class. ':selectMapData');
+    $app->post('/map', UserController::class . ':getMap');
 
     $app->group('/inventory', function (Group $group) {
         //인벤토리 조회
-        $group->post('', InventoryController::class . ':selectInventory');
+        $group->post('', InventoryController::class . ':getInventory');
 
         //채비 업그레이드
         $group->post('/upgrade', InventoryController::class . ':upgradeEquipment');
@@ -52,7 +52,7 @@ return function (App $app) {
         $group->post('/unequip', InventoryController::class . ':unequipEquipment');
 
         //장착한 채비 조회
-        $group->post('/equipSlot', InventoryController::class . ':selectEquipSlot');
+        $group->post('/equipSlot', InventoryController::class . ':getEquipSlot');
 
         //장착한 내구도 수리
         $group->post('/repair', InventoryController::class . ':repairEquipment');
@@ -60,7 +60,7 @@ return function (App $app) {
 
     $app->group('/boat', function (Group $group) {
         //사용중인 배 조회
-        $group->post('', BoatController::class . ':selectBoat');
+        $group->post('', BoatController::class . ':getBoat');
 
         //배 업그레이드
         $group->post('/upgrade', BoatController::class . ':upgradeBoat');
@@ -68,14 +68,14 @@ return function (App $app) {
 
     $app->group('/mailBox', function (Group $group) {
         //선물함 조회
-        $group->post('', MailBoxController::class . ':selectMailBox');
+        $group->post('', MailBoxController::class . ':getMailBox');
 
         //선물함 아이템 수령
-        $group->post('/receive', MailBoxController::class . ':receiveMailBoxItem');
+        $group->post('/receive', MailBoxController::class . ':getMail');
     });
 
     //도감 조회
-    $app->post('/collection', CollectionController::class. ':selectCollection');
+    $app->post('/collection', CollectionController::class . ':getColl');
 
     $app->group('/fishing', function (Group $group) {
         //낚시 시작
@@ -86,24 +86,24 @@ return function (App $app) {
     });
 
     //수조 조회
-    $app->post('/waterTank', WaterTankController::class. ':selectWaterTank');
+    $app->post('/waterTank', WaterTankController::class . ':getWaterTank');
 
     //출항
-    $app->post('/departure', BoatController::class. ':departure');
+    $app->post('/departure', BoatController::class . ':departure');
 
     //입항
-    $app->post('/arrival', BoatController::class. ':arrival');
+    $app->post('/arrival', BoatController::class . ':arrival');
 
     $app->group('/auction', function (Group $group) {
         //경매 조회
-        $group->post('', AuctionController::class . ':selectAuction');
+        $group->post('', AuctionController::class . ':getFishSellList');
 
         //경매에 물고기 판매
         $group->post('/sellFish', AuctionController::class . ':sellFish');
     });
 
     //주간 순위 조회
-    $app->post('/weeklyRanking', RankingController::class. ':selectRanking');
+    $app->post('/weeklyRanking', RankingController::class. ':ranking');
 
     //기획데이터 저장
     //PLAN_DATA(csv) upload to server DB

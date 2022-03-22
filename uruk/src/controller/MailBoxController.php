@@ -16,7 +16,7 @@ class MailBoxController
         $this->mailBoxService = new MailBoxService();
     }
 
-    public function selectMailBox(Request $request, Response $response)
+    public function getMailBox(Request $request, Response $response)
     {
         $input = $request->getParsedBody();
 
@@ -32,7 +32,7 @@ class MailBoxController
         }
     }
 
-    public function receiveMailBoxItem(Request $request, Response $response)
+    public function getMail(Request $request, Response $response)
     {
         $input = $request->getParsedBody();
 

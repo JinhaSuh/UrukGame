@@ -16,7 +16,7 @@ class CollectionController
         $this->collectionService = new CollectionService();
     }
 
-    public function selectCollection(Request $request, Response $response)
+    public function getColl(Request $request, Response $response)
     {
         $input = $request->getParsedBody();
 
