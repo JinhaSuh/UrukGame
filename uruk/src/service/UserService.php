@@ -7,20 +7,18 @@ use App\exception\GoldShortage;
 use App\exception\InvalidError;
 use App\exception\UnknownUser;
 use App\exception\InvalidRequestBody;
+use App\repository\ScribeRepository;
 use App\repository\UserRepository;
 
 class UserService
 {
     private UserRepository $userRepository;
+    private ScribeRepository $scribeRepository;
 
     public function __construct()
     {
         $this->userRepository = new UserRepository();
-    }
-
-    public function select_users()
-    {
-        return $this->userRepository->select_user_list();
+        $this->scribeRepository = new ScribeRepository();
     }
 
     /**
@@ -58,6 +56,10 @@ class UserService
         if ($selected_user["gold"] < 0) throw new GoldShortage();
 
         $updated_user = $this->userRepository->update_user($selected_user);
+
+        //scribe - asset
+        $this->scribeRepository->AssetLog($updated_user, 1, 100 * (-1), "buy_fatigue");
+
         return $updated_user;
     }
 }

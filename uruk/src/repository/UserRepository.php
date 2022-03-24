@@ -102,7 +102,7 @@ class UserRepository
     }
 
     /**
-     * @throws InvalidError
+     * @throws UnknownUser
      */
     public function update_user_state(int $user_id, int $state, int $depth)
     {
@@ -114,6 +114,7 @@ class UserRepository
         $stmt->bindParam(':depth', $depth);
 
         $stmt->execute();
+        return $this->select_user_state($user_id);
     }
 
     /**

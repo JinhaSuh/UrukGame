@@ -1,7 +1,8 @@
 {
     "require": {
         "slim/slim": "4.*",
-        "slim/psr7": "^1.5"
+        "slim/psr7": "^1.5",
+        "tranch/scribe-client": "v0.1.1"
     },
     "autoload": {
         "psr-4": {

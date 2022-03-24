@@ -49,6 +49,19 @@ class AccountRepository
             throw new UnknownHiveID();
     }
 
+    public function select_account_by_player_id($account)
+    {
+        $player_id = $account["player_id"];
+        $sql = "SELECT * FROM account WHERE player_id =:playerId";
+
+        $stmt = $this->game_db_conn->prepare($sql);
+        $stmt->bindParam(':playerId', $player_id);
+
+        $stmt->execute();
+        if ($stmt->rowCount() > 0)
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     /**
      * @throws UnknownHiveID
      */

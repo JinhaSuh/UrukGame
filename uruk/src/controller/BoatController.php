@@ -54,7 +54,7 @@ class BoatController
 
         try {
             $result = $this->boatService->departure($input);
-            $response->getBody()->write(json_encode($result->jsonSerialize()));
+            $response->getBody()->write(json_encode($result));
             return $response
                 ->withHeader('content-type', 'application/json')
                 ->withStatus(200);
@@ -70,7 +70,23 @@ class BoatController
 
         try {
             $result = $this->boatService->arrival($input);
-            $response->getBody()->write(json_encode($result->jsonSerialize()));
+            $response->getBody()->write(json_encode($result));
+            return $response
+                ->withHeader('content-type', 'application/json')
+                ->withStatus(200);
+        } catch (MyException $e) {
+            $response->getBody()->write(json_encode($e->jsonSerialize()));
+            return $response->withHeader('content-type', 'application/json')->withStatus(200);
+        }
+    }
+
+    public function refuelBoat(Request $request, Response $response)
+    {
+        $input = $request->getParsedBody();
+
+        try {
+            $result = $this->boatService->refuel($input);
+            $response->getBody()->write(json_encode($result));
             return $response
                 ->withHeader('content-type', 'application/json')
                 ->withStatus(200);

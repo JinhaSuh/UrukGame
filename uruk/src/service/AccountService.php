@@ -11,6 +11,7 @@ use App\exception\UnknownUser;
 use App\repository\AccountRepository;
 use App\repository\BoatRepository;
 use App\repository\InventoryRepository;
+use App\repository\ScribeRepository;
 use App\repository\UserRepository;
 
 class AccountService
@@ -19,6 +20,7 @@ class AccountService
     private UserRepository $userRepository;
     private BoatRepository $boatRepository;
     private InventoryRepository $inventoryRepository;
+    private ScribeRepository $scribeRepository;
 
     public function __construct()
     {
@@ -26,11 +28,7 @@ class AccountService
         $this->userRepository = new UserRepository();
         $this->boatRepository = new BoatRepository();
         $this->inventoryRepository = new InventoryRepository();
-    }
-
-    public function select_accounts()
-    {
-        return $this->accountRepository->select_account_list();
+        $this->scribeRepository = new ScribeRepository();
     }
 
     /**
@@ -44,7 +42,18 @@ class AccountService
             throw new InvalidRequestBody();
         }
 
-        return $this->accountRepository->select_account($account);
+        $select_account = $this->accountRepository->select_account($account);
+        //scribe - login
+        $msg[] = [
+            "user_id" => $select_account["user_id"],
+            "player_id" => $select_account["player_id"],
+            "password" => $select_account["password"],
+            "nation" => $select_account["nation"],
+            "language" => $select_account["language"]
+        ];
+        $this->scribeRepository->Log("login", $msg);
+
+        return $select_account;
     }
 
     /**
@@ -57,8 +66,9 @@ class AccountService
             throw new InvalidRequestBody();
         }
 
-        //계정 생성
-        $new_account = $this->accountRepository->insert_account($account);
+        $select_account = $this->accountRepository->select_account_by_player_id($account);
+        if (empty($select_account)) $new_account = $this->accountRepository->insert_account($account);
+        else throw new UnknownHiveID();
 
         //유저 초기화
         $user = new User();
@@ -85,6 +95,16 @@ class AccountService
 
         //채비 초기화
         $this->insert_default_equipments($new_user["user_id"]);
+
+        //scribe - signup
+        $msg[] = [
+            "user_id" => $new_account["user_id"],
+            "player_id" => $new_account["player_id"],
+            "password" => $new_account["password"],
+            "nation" => $new_account["nation"],
+            "language" => $new_account["language"]
+        ];
+        $this->scribeRepository->Log("signup", $msg);
 
         return $new_account;
     }

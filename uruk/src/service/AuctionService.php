@@ -9,6 +9,7 @@ use App\exception\UnknownUser;
 use App\repository\AuctionRepository;
 use App\repository\FishingRepository;
 use App\repository\RankingRepository;
+use App\repository\ScribeRepository;
 use App\repository\WaterTankRepository;
 use App\repository\UserRepository;
 use App\repository\RedisRepository;
@@ -21,6 +22,7 @@ class AuctionService
     private FishingRepository $fishingRepository;
     private RankingRepository $rankingRepository;
     private RedisRepository $redisRepository;
+    private ScribeRepository $scribeRepository;
 
     public function __construct()
     {
@@ -30,6 +32,7 @@ class AuctionService
         $this->fishingRepository = new FishingRepository();
         $this->rankingRepository = new RankingRepository();
         $this->redisRepository = new RedisRepository();
+        $this->scribeRepository = new ScribeRepository();
     }
 
     /**
@@ -100,6 +103,9 @@ class AuctionService
         else $this->rankingRepository->update_ranking($input["user_id"], date("Y-m-d H:i:s"), $user_ranking["gold_sum"] + $auction_fish["price"]);
 */
         $updated_gold = $this->redisRepository->add_user_gold($input["user_id"], $auction_fish["price"]);
+
+        //scribe - asset
+        $this->scribeRepository->AssetLog($updated_user, 1, $auction_fish["price"], "sell_fish");
 
         return $this->auctionRepository->select_auction($input["user_id"]);
     }

@@ -2,6 +2,7 @@
 
 namespace App\service;
 
+use App\exception\ExcessMaxFuel;
 use App\exception\UnknownUser;
 use DateTime;
 use App\dto\Boat;
@@ -25,6 +26,7 @@ use App\repository\BoatRepository;
 use App\repository\InventoryRepository;
 use App\repository\MapRepository;
 use App\repository\UserRepository;
+use App\repository\ScribeRepository;
 
 class BoatService
 {
@@ -32,6 +34,7 @@ class BoatService
     private UserRepository $userRepository;
     private InventoryRepository $inventoryRepository;
     private MapRepository $mapRepository;
+    private ScribeRepository $scribeRepository;
 
     public function __construct()
     {
@@ -39,6 +42,7 @@ class BoatService
         $this->userRepository = new UserRepository();
         $this->inventoryRepository = new InventoryRepository();
         $this->mapRepository = new MapRepository();
+        $this->scribeRepository = new ScribeRepository();
     }
 
     /**
@@ -93,6 +97,9 @@ class BoatService
                 break;
         }
         $updated_user = $this->userRepository->update_user($curr_user);
+
+        //scribe - asset
+        $this->scribeRepository->AssetLog($updated_user, $boat_upgrade_data["need_item_type_id"], $boat_upgrade_data["need_count"] * (-1), "boat_upgrade");
 
         //성공 여부에 따라 업그레이드 또는 내구도 감소
         $success_rate = $boat_upgrade_data["success_rate"];
@@ -153,6 +160,10 @@ class BoatService
         $user["fatigue"] -= 4;
         $user["gold"] -= $map_list[$input["map_id"] - 1]["departure_cost"];
         $updated_user = $this->userRepository->update_user($user);
+
+        //scribe - asset
+        $this->scribeRepository->AssetLog($updated_user, 1, $map_list[$input["map_id"] - 1]["departure_cost"] * (-1), "departure");
+
         //플레이어 상태 항해중으로 변경
         //$this->userRepository->update_user_state($input["user_id"], 1, 0);
         //시간이 흐르면서 내구도나 연료가 0이하면 강제 입항
@@ -189,7 +200,24 @@ class BoatService
         $boat->set_map_id($input["map_id"]);
         $updated_boat = $this->boatRepository->update_boat($input["user_id"], $boat);
         //플레이어 상태 항해중으로 변경
-        $this->userRepository->update_user_state($input["user_id"], 2, 0);
+        $updated_user_state = $this->userRepository->update_user_state($input["user_id"], 2, 0);
+
+        //scribe - departure
+        $msg[] = [
+            "user_id" => $updated_user["user_id"],
+            "user_state" => $updated_user_state["state"],
+            "user_name" => $updated_user["user_name"],
+            "level" => $updated_user["level"],
+            "exp" => $updated_user["exp"],
+            "fatigue" => $updated_user["fatigue"],
+            "gold" => $updated_user["gold"],
+            "pearl" => $updated_user["pearl"],
+            "boat_id" => $updated_boat["boat_id"],
+            "durability" => $updated_boat["durability"],
+            "departure_time" => $updated_boat["departure_time"],
+            "map_id" => $updated_boat["map_id"]
+        ];
+        $this->scribeRepository->Log("departure", $msg);
 
         return new Success();
     }
@@ -207,7 +235,7 @@ class BoatService
         //플레이어 상태 확인
         $user_state = $this->userRepository->select_user_state($input["user_id"]);
         if ($user_state["state"] != 2) throw new InvalidUserState();
-        $this->userRepository->update_user_state($input["user_id"], 0, 0);
+        $updated_user_state = $this->userRepository->update_user_state($input["user_id"], 0, 0);
 
         //배 위치 변경
         $result = $this->boatRepository->select_boat($input["user_id"]);
@@ -215,10 +243,67 @@ class BoatService
         $boat->set_boat_id($result["boat_id"]);
         $boat->set_durability($result["durability"]);
         $boat->set_fuel($result["fuel"]);
-        $boat->set_departure_time(new DateTime($result["departure_time"]));
+        $now_date = date("Y-m-d H:i:s");
+        $boat->set_departure_time(new DateTime($now_date));
         $boat->set_map_id($result["map_id"]);
         $boat->set_map_id(0);
         $updated_boat = $this->boatRepository->update_boat($input["user_id"], $boat);
+
+        //scribe - arrival
+        $msg[] = [
+            "user_id" => $input["user_id"],
+            "user_state" => $updated_user_state["state"],
+            "boat_id" => $updated_boat["boat_id"],
+            "durability" => $updated_boat["durability"],
+            "departure_time" => $updated_boat["departure_time"],
+            "map_id" => $updated_boat["map_id"]
+        ];
+        $this->scribeRepository->Log("arrival", $msg);
+
+        return new Success();
+    }
+
+
+    /**
+     * @throws ExcessMaxFuel|InvalidUserState|InvalidError|MaxGrade|UnknownUser|GoldShortage|InvalidRequestBody
+     */
+    public function refuel($input)
+    {
+        if (!isset($input["user_id"])) {
+            throw new InvalidRequestBody();
+        }
+
+        //플레이어 상태 확인
+        $user_state = $this->userRepository->select_user_state($input["user_id"]);
+        if ($user_state["state"] != 0) throw new InvalidUserState();
+
+        $curr_user = $this->userRepository->select_user($input);
+
+        //배 정보 확인
+        $result = $this->boatRepository->select_boat($input["user_id"]);
+        $curr_boat = new Boat();
+        $curr_boat->set_boat_id($result["boat_id"]);
+        $curr_boat->set_durability($result["durability"]);
+        $curr_boat->set_fuel($result["fuel"]);
+        $curr_boat->set_departure_time(new DateTime($result["departure_time"]));
+        $curr_boat->set_map_id($result["map_id"]);
+
+        //배 기획 데이터 가져오기
+        $boat_data = $this->boatRepository->select_boat_data($curr_boat->boat_id);
+        $max_fuel = $boat_data["max_fuel"];
+
+        //골드를 소비하고, 연료 충전
+        if ($curr_boat->fuel + 10 >= $max_fuel) throw new ExcessMaxFuel();
+        if ($curr_user["gold"] - 100 < 0) throw new GoldShortage();
+        $curr_boat->fuel += 10;
+        $curr_user["gold"] -= 100;
+
+        $updated_boat = $this->boatRepository->update_boat($input["user_id"], $curr_boat);
+
+        $updated_user = $this->userRepository->update_user($curr_user);
+
+        //scribe - asset
+        $this->scribeRepository->AssetLog($updated_user, 1, 100 * (-1), "refuel");
 
         return new Success();
     }

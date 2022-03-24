@@ -13,6 +13,7 @@ use App\repository\BoatRepository;
 use App\repository\FishingRepository;
 use App\repository\InventoryRepository;
 use App\repository\MailBoxRepository;
+use App\repository\ScribeRepository;
 use App\repository\UserRepository;
 
 class MailBoxService
@@ -20,8 +21,8 @@ class MailBoxService
     private MailBoxRepository $mailBoxRepository;
     private UserRepository $userRepository;
     private InventoryRepository $inventoryRepository;
-    private BoatRepository $boatRepository;
     private FishingRepository $fishingRepository;
+    private ScribeRepository $scribeRepository;
 
     public function __construct()
     {
@@ -29,6 +30,7 @@ class MailBoxService
         $this->userRepository = new UserRepository();
         $this->inventoryRepository = new InventoryRepository();
         $this->fishingRepository = new FishingRepository();
+        $this->scribeRepository = new ScribeRepository();
     }
 
     /**
@@ -65,6 +67,9 @@ class MailBoxService
                 if ($result["item_type_id"] == 1) $now_user["gold"] += $result["item_count"];
                 else $now_user["pearl"] += $result["item_count"];
                 $updated_user = $this->userRepository->update_user($now_user);
+
+                //scribe - asset
+                $this->scribeRepository->AssetLog($updated_user, $result["item_type_id"], $result["item_count"], "receive_item");
                 break;
             case 3: //fish
                 //TODO(Later) : 물고기도 선물을 받나

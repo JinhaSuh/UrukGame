@@ -5,12 +5,14 @@ use App\controller\BoatController;
 use App\controller\FishingController;
 use App\controller\InventoryController;
 use App\controller\RankingController;
+use App\controller\ShopController;
 use App\controller\UserController;
 use App\controller\AccountController;
 use App\controller\MailBoxController;
 use App\controller\CollectionController;
 use App\controller\WaterTankController;
 use App\db\Plan_Data_Database;
+use App\log\LogService;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Interfaces\RouteCollectorProxyInterface as Group;
@@ -64,6 +66,9 @@ return function (App $app) {
 
         //배 업그레이드
         $group->post('/upgrade', BoatController::class . ':upgradeBoat');
+
+        //배 연료 구매
+        $group->post('/refuel', BoatController::class . ':refuelBoat');
     });
 
     $app->group('/mailBox', function (Group $group) {
@@ -76,6 +81,14 @@ return function (App $app) {
 
     //도감 조회
     $app->post('/collection', CollectionController::class . ':getColl');
+
+    $app->group('/shop', function (Group $group) {
+        //상점 조회
+        $group->post('', ShopController::class . ':getShop');
+
+        //상점 아이템 구매
+        $group->post('/buy', ShopController::class . ':ItemBuy');
+    });
 
     $app->group('/fishing', function (Group $group) {
         //낚시 시작

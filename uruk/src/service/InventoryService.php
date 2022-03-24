@@ -17,17 +17,20 @@ use App\exception\SameEquippedState;
 use App\exception\UnknownItemType;
 use App\exception\UnknownUser;
 use App\repository\InventoryRepository;
+use App\repository\ScribeRepository;
 use App\repository\UserRepository;
 
 class InventoryService
 {
     private InventoryRepository $inventoryRepository;
     private UserRepository $userRepository;
+    private ScribeRepository $scribeRepository;
 
     public function __construct()
     {
         $this->inventoryRepository = new InventoryRepository();
         $this->userRepository = new UserRepository();
+        $this->scribeRepository = new ScribeRepository();
     }
 
     /**
@@ -132,6 +135,10 @@ class InventoryService
         }
 
         $upgraded_equipment = $this->inventoryRepository->update_equipment($user_id, $inv_id, $equipment);
+
+        //scribe - asset
+        $this->scribeRepository->AssetLog($updated_user, $equip_upgrade_data["need_item_type_id"], $equip_upgrade_data["need_count"] * (-1), "upgrade_equipment");
+
         return $upgraded_equipment;
     }
 
@@ -224,11 +231,13 @@ class InventoryService
             $updated_user = $this->userRepository->update_user($curr_user);
 
             //장비 업데이트
-            $updated_equipment = $this->inventoryRepository->update_equipment($user_id,$inv_id, $equipment);
+            $updated_equipment = $this->inventoryRepository->update_equipment($user_id, $inv_id, $equipment);
+
+            //scribe - asset
+            $this->scribeRepository->AssetLog($updated_user, $equipment_repair_data["need_item_type_id"], $equipment_repair_data["need_count"] * (-1), "repair_equipment");
 
             return $updated_equipment;
-        }
-        else throw new InvalidRepairEquipment();
+        } else throw new InvalidRepairEquipment();
     }
 
     /**

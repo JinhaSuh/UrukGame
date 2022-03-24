@@ -208,7 +208,7 @@ class FishingService
         }
 
         //유저 정보 업데이트
-        $update_user = $this->userRepository->update_user($user);
+        $updated_user = $this->userRepository->update_user($user);
 
         $this->endFishing($input, $equipSlot);
 
