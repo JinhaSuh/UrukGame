@@ -17,10 +17,13 @@ class ScribeRepository
     {
         $this->client = $this->create_scribe_client();
     }
-    public function AssetLog(array $updated_user, int $item_type_id, int $item_count, string $action){
-        $msg[] = [
+
+    //TODO : DW 로그 남기기
+
+    public function AssetLog(array $updated_user, int $item_type_id, int $item_count, string $action)
+    {
+        $msg = [
             "user_id" => $updated_user["user_id"],
-            "user_name" => $updated_user["user_name"],
             "level" => $updated_user["level"],
             "exp" => $updated_user["exp"],
             "fatigue" => $updated_user["fatigue"],
@@ -34,25 +37,27 @@ class ScribeRepository
         $this->Log("asset", $msg);
     }
 
-    public function Log(string $table, array $msg){
+    public function Log(string $table, $msg)
+    {
+        date_default_timezone_set('Asia/Seoul');
+        $date = date('Y-m-d h:i:s');
+        $msg += ["log_time" => $date];
         $now_date = date("Ymd");
         $log[] = new LogEntry(array(
-            'category' => $table ."_log_". $now_date,
-            'message' => json_encode($msg[0])
+            'category' => $table . "_log_" . $now_date,
+            'message' => json_encode($msg)
         ));
         $this->client->Log($log);
     }
 
     function create_scribe_client()
     {
-
         try {
 
             // Set up the socket connections
             $scribe_servers = array('192.168.152.1');
             $scribe_ports = array(1463);
 
-            //print "creating socket pool\n";
             $sock = new TSocketPool($scribe_servers, $scribe_ports);
             $sock->setDebug(0);
             $sock->setSendTimeout(1000);
@@ -64,11 +69,9 @@ class ScribeRepository
             $prot = new TBinaryProtocol($trans);
 
             // Create the client
-            //print "creating scribe client\n";
             $scribe_client = new scribeClient($prot);
 
             // Open the transport (we rely on PHP to close it at script termination)
-            //print "opening transport\n";
             $trans->open();
         } catch (Exception $e) {
             print "Unable to create global scribe client, received exception: $e \n";

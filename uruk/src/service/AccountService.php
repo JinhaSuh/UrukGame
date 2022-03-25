@@ -44,7 +44,7 @@ class AccountService
 
         $select_account = $this->accountRepository->select_account($account);
         //scribe - login
-        $msg[] = [
+        $msg = [
             "user_id" => $select_account["user_id"],
             "player_id" => $select_account["player_id"],
             "password" => $select_account["password"],
@@ -97,7 +97,7 @@ class AccountService
         $this->insert_default_equipments($new_user["user_id"]);
 
         //scribe - signup
-        $msg[] = [
+        $msg = [
             "user_id" => $new_account["user_id"],
             "player_id" => $new_account["player_id"],
             "password" => $new_account["password"],

@@ -5,7 +5,7 @@ namespace App;
 use PDO;
 use PDOException;
 
-class Log_Database
+class LogDatabase
 {
     private $host = "192.168.152.1:3306";
     private $db_name = "LOG_DATA";

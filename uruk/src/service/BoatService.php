@@ -203,10 +203,9 @@ class BoatService
         $updated_user_state = $this->userRepository->update_user_state($input["user_id"], 2, 0);
 
         //scribe - departure
-        $msg[] = [
+        $msg = [
             "user_id" => $updated_user["user_id"],
             "user_state" => $updated_user_state["state"],
-            "user_name" => $updated_user["user_name"],
             "level" => $updated_user["level"],
             "exp" => $updated_user["exp"],
             "fatigue" => $updated_user["fatigue"],
@@ -250,7 +249,7 @@ class BoatService
         $updated_boat = $this->boatRepository->update_boat($input["user_id"], $boat);
 
         //scribe - arrival
-        $msg[] = [
+        $msg = [
             "user_id" => $input["user_id"],
             "user_state" => $updated_user_state["state"],
             "boat_id" => $updated_boat["boat_id"],
