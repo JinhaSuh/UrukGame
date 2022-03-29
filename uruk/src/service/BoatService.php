@@ -304,7 +304,7 @@ class BoatService
         //scribe - asset
         $this->scribeRepository->AssetLog($updated_user, 1, 100 * (-1), "refuel");
 
-        return new Success();
+        return $updated_boat;
     }
 
 }

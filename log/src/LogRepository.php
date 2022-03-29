@@ -242,5 +242,13 @@ class LogRepository
         $stmt->execute();
     }
 
-    //TODO : 파일 -> DB 할 때 파일의 내용(일부분이라도)이 이미 DB에 있다면 DB를 지우고 새로 INSERT
+    public function select_table(string $table_name){
+        $sql = "SELECT * FROM ".$table_name;
+
+        $stmt = $this->log_db_conn->prepare($sql);
+
+        $stmt->execute();
+        if ($stmt->rowCount() > 0)
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

@@ -27,7 +27,6 @@ class RankingService
             throw new InvalidRequestBody();
         }
 
-        //TODO : 주마다 리셋
         $user_rank = $this->redisRepository->select_user_ranking($input["user_id"]);
         $user_gold = $this->redisRepository->select_user_gold($input["user_id"]);
         return [

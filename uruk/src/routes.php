@@ -124,8 +124,6 @@ return function (App $app) {
     $app->get('/upload/{filename}', function (Request $request, Response $response) {
         $filename = $request->getAttribute('filename');
 
-        //TODO : csv첫 행에 표현된 column 정보를 읽고 table 생성
-
         /*        $sql = "CREATE TABLE auction_data
                         (
                             fish_id int(11) NOT NULL,

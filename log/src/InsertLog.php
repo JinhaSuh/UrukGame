@@ -12,9 +12,9 @@ $loadLog->listDirFiles("/game/log/scribe/default_primary");
 
 $table_list = array("signup_log", "login_log", "departure_log", "arrival_log", "asset_log");
 
-$log_file_list = $loadLog->getFiles();
+$log_file_list = array_diff($loadLog->getFiles(), $loadLog->getExcludedFiles());
 
-//Insert log to tables
+//INSERT 로그 DB
 for ($i = 0; $i < count($log_file_list); $i++) {
     for ($j = 0; $j < count($table_list); $j++) {
         if (strpos($log_file_list[$i], $table_list[$j]) !== false) {
@@ -31,6 +31,3 @@ for ($i = 0; $i < count($log_file_list); $i++) {
         }
     }
 }
-
-//TODO : 특정 날짜의 log만 읽어들이기
-//TODO : 로그 DB 조회

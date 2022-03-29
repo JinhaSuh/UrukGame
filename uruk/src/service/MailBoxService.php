@@ -72,17 +72,6 @@ class MailBoxService
                 $this->scribeRepository->AssetLog($updated_user, $result["item_type_id"], $result["item_count"], "receive_item");
                 break;
             case 3: //fish
-                //TODO(Later) : 물고기도 선물을 받나
-                //INSERT INTO water_tank VALUES fish
-//                $fish_data = $this->fishingRepository->select_fish_data($result["item_id"]);
-//                $updated_water_tank = $this->waterTankRepository->insert_water_tank_fish($data["user_id"], $fish_info);
-//
-//                $fish = Fish::Deserialize($caught_fish);
-//                $fish_info = new FishInfo();
-//                $fish_info->user_id = $input["user_id"];
-//                $fish_info->fish_id = $fish->fish_id;
-//                $fish_info->length = rand($fish->min_length, $fish->max_length);
-//                $fish_info->caught_time = new DateTime(date("Y-m-d H:i:s"));
                 break;
             case 4: //fishing_rod
             case 5: //weight
@@ -103,8 +92,6 @@ class MailBoxService
                 $updated_inventory = $this->inventoryRepository->insert_equipment($data["user_id"], $equipment);
                 break;
             case 10: //boat
-                //TODO(Later) : 배도 선물을 받나
-                //UPDATE boat
                 break;
         }
 

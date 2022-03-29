@@ -158,7 +158,6 @@ class FishingService
             $user["exp"] += 5;
 
         } else { //낚시
-            //TODO(Later) : 날씨 영향, 희귀 물고기 등장 확률
             $fish_list = array();
             for ($i = 0; $i < count($map_drop_fish_list); $i++) {
                 $fish_data = $this->fishingRepository->select_fish_data($map_drop_fish_list[$i]["fish_id"]);

@@ -18,8 +18,6 @@ class ScribeRepository
         $this->client = $this->create_scribe_client();
     }
 
-    //TODO : DW 로그 남기기
-
     public function AssetLog(array $updated_user, int $item_type_id, int $item_count, string $action)
     {
         $msg = [
